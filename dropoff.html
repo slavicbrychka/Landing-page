@@ -2,124 +2,74 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="E-Cycle Drop-Off">
-<meta name="theme-color" content="#1a4f8a">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Precision E-Cycle — Drop-Off Form</title>
-
-<!-- PWA Manifest (inline via JS since we're single-file) -->
-<script>
-  const manifestData = {
-    name: "Precision E-Cycle Drop-Off",
-    short_name: "E-Cycle",
-    description: "Electronics recycling drop-off form",
-    start_url: "./Drop_Off_Form_Mobile.html",
-    display: "standalone",
-    background_color: "#f0ede8",
-    theme_color: "#1a4f8a",
-    orientation: "portrait",
-    icons: [
-      { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232d6a2d'/><text y='130' font-size='120' text-anchor='middle' x='96'>♻</text></svg>", sizes: "192x192", type: "image/svg+xml" }
-    ]
-  };
-  const blob = new Blob([JSON.stringify(manifestData)], {type:'application/json'});
-  const manifestURL = URL.createObjectURL(blob);
-  document.write('<link rel="manifest" href="' + manifestURL + '">');
-</script>
-
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --green: #1a4f8a;
-    --green-light: #2563b0;
-    --green-pale: #e8f0fb;
+    --green: #2d6a2d;
+    --green-light: #3d8a3d;
+    --green-pale: #e8f4e8;
     --ink: #1a1a1a;
     --mid: #555;
     --border: #c5c5c5;
     --bg: #f0ede8;
     --white: #ffffff;
     --yellow: #f5c518;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-left: env(safe-area-inset-left, 0px);
-    --safe-right: env(safe-area-inset-right, 0px);
   }
-
-  html { height: -webkit-fill-available; }
 
   body {
     font-family: 'Barlow', sans-serif;
     background: var(--bg);
     min-height: 100vh;
-    min-height: -webkit-fill-available;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 0 calc(16px + var(--safe-bottom));
-    gap: 0;
-    /* Room for sticky toolbar at top */
-    padding-top: calc(60px + var(--safe-top));
-    /* Prevent transforms on children from creating new stacking contexts that trap fixed elements */
-    isolation: auto;
+    padding: 24px 16px 40px;
+    gap: 16px;
   }
 
-  /* ===================== TOOLBAR (STICKY) ===================== */
+  /* TOOLBAR */
   .toolbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
     background: var(--ink);
-    padding: 10px 14px;
-    padding-top: calc(10px + var(--safe-top));
-    padding-left: calc(14px + var(--safe-left));
-    padding-right: calc(14px + var(--safe-right));
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    padding: 10px 18px;
+    width: 100%;
+    max-width: 720px;
+    border-radius: 2px;
   }
 
   .toolbar-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     color: rgba(255,255,255,0.45);
     margin-right: auto;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .btn {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
-    /* Minimum 44px touch target */
-    min-height: 44px;
-    min-width: 44px;
-    padding: 10px 16px;
+    padding: 8px 18px;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    gap: 7px;
     transition: opacity 0.15s, transform 0.1s;
-    border-radius: 2px;
-    flex-shrink: 0;
   }
 
-  .btn:active { transform: scale(0.95); opacity: 0.8; }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.97); }
 
   .btn-new {
     background: rgba(255,255,255,0.12);
@@ -132,59 +82,49 @@
     color: var(--white);
   }
 
-  /* ===================== PAGE CARD ===================== */
+  /* PAGE */
   .page {
     width: 100%;
     max-width: 720px;
     background: var(--white);
-    border-top: 2px solid var(--ink);
-    border-bottom: 2px solid var(--ink);
-    /* On wider screens show side borders */
+    border: 2px solid var(--ink);
+    box-shadow: 5px 5px 0 var(--green);
   }
 
-  @media (min-width: 740px) {
-    .page {
-      border: 2px solid var(--ink);
-      box-shadow: 5px 5px 0 var(--green);
-      margin: 16px;
-    }
-    body { padding-top: calc(72px + var(--safe-top)); }
-  }
-
-  /* ===================== HEADER ===================== */
+  /* HEADER */
   .header {
     background: var(--green);
     color: var(--white);
-    padding: 14px 16px 12px;
+    padding: 16px 22px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
   }
 
   .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
   }
 
-  .recycle-icon { width: 36px; height: 36px; flex-shrink: 0; }
+  .recycle-icon { width: 42px; height: 42px; flex-shrink: 0; }
 
   .company-name {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800;
-    font-size: 22px;
+    font-size: 28px;
     letter-spacing: 0.5px;
     line-height: 1;
     text-transform: uppercase;
   }
 
   .company-tag {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 500;
     opacity: 0.75;
     margin-top: 3px;
-    letter-spacing: 0.8px;
+    letter-spacing: 1px;
     text-transform: uppercase;
   }
 
@@ -192,7 +132,7 @@
 
   .doc-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -201,19 +141,19 @@
 
   .form-number-val {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 800;
     letter-spacing: 1px;
   }
 
-  /* ===================== DATE STRIP ===================== */
+  /* DATE STRIP */
   .date-strip {
     background: var(--ink);
     color: var(--white);
-    padding: 6px 16px;
+    padding: 6px 22px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 28px;
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     letter-spacing: 1px;
@@ -223,8 +163,8 @@
   .date-strip span { opacity: 0.45; }
   .date-strip strong { opacity: 1; font-weight: 600; }
 
-  /* ===================== BODY ===================== */
-  .body { padding: 14px 14px 8px; }
+  /* BODY */
+  .body { padding: 16px 22px 10px; }
 
   .section { margin-bottom: 14px; }
 
@@ -242,7 +182,7 @@
 
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .full { grid-column: 1 / -1; }
-  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field { display: flex; flex-direction: column; gap: 3px; }
 
   label {
     font-size: 10px;
@@ -252,7 +192,6 @@
     color: var(--mid);
   }
 
-  /* ===================== INPUTS — larger touch targets ===================== */
   input[type="text"],
   input[type="tel"],
   input[type="number"],
@@ -260,26 +199,14 @@
   textarea {
     border: 1.5px solid var(--border);
     border-radius: 0;
-    /* 16px font prevents iOS auto-zoom */
-    font-size: 16px;
-    padding: 10px 10px;
+    padding: 7px 9px;
     font-family: 'Barlow', sans-serif;
+    font-size: 13px;
     color: var(--ink);
     background: var(--white);
     outline: none;
     width: 100%;
     transition: border-color 0.15s;
-    /* Minimum height for comfortable touch */
-    min-height: 44px;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 30px;
   }
 
   input:focus, select:focus, textarea:focus {
@@ -287,30 +214,21 @@
     background: var(--green-pale);
   }
 
-  textarea { resize: vertical; min-height: 60px; }
+  textarea { resize: vertical; min-height: 44px; }
 
-  /* ===================== ITEMS TABLE ===================== */
-  .table-scroll-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--border);
-    margin-bottom: 2px;
-  }
-
-  .items-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+  /* ITEMS TABLE */
+  .items-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 
   .items-table th {
     background: var(--ink);
     color: var(--white);
-    padding: 8px 7px;
+    padding: 6px 7px;
     text-align: left;
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     font-weight: 600;
-    white-space: nowrap;
   }
 
   .items-table th.center,
@@ -319,7 +237,6 @@
   .items-table td {
     padding: 4px 5px;
     border-bottom: 1px solid #e8e8e8;
-    vertical-align: middle;
   }
 
   .items-table tr:nth-child(even) td { background: #fafafa; }
@@ -327,73 +244,43 @@
   .items-table td input,
   .items-table td select {
     border: 1px solid #ddd;
-    padding: 8px 6px;
-    font-size: 16px; /* Prevents iOS zoom */
+    padding: 4px 6px;
+    font-size: 12px;
     width: 100%;
     background: transparent;
-    min-height: 40px;
-    -webkit-appearance: none;
-    appearance: none;
-    border-radius: 0;
-    font-family: 'Barlow', sans-serif;
   }
 
   .items-table td input[type="number"] { text-align: center; }
 
-  .items-table td select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 6px center;
-    padding-right: 22px;
-  }
-
-  /* Scroll hint label */
-  .scroll-hint {
-    font-size: 10px;
-    color: var(--mid);
-    opacity: 0.7;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
   .add-row-btn {
-    margin-top: 8px;
+    margin-top: 7px;
     background: none;
     border: 1.5px dashed var(--green);
     color: var(--green);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    padding: 10px 16px;
+    padding: 5px 12px;
     cursor: pointer;
     transition: background 0.15s;
-    min-height: 44px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
   }
 
-  .add-row-btn:active { background: var(--green-pale); }
+  .add-row-btn:hover { background: var(--green-pale); }
 
-  /* ===================== TOTALS + PAYMENT ===================== */
+  /* TOTALS + PAYMENT ROW */
   .summary-payment-row {
     display: grid;
     grid-template-columns: 1fr 1.4fr;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 14px;
   }
 
   .totals-box {
     background: var(--green-pale);
     border: 1.5px solid var(--green);
-    padding: 10px 12px;
+    padding: 10px 14px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -421,18 +308,18 @@
     color: var(--ink);
   }
 
-  .total-divider { border: none; border-top: 1px solid #b3c9f0; }
+  .total-divider { border: none; border-top: 1px solid #bdd9bd; }
 
-  /* ===================== PAYMENT ===================== */
+  /* PAYMENT */
   .payment-box {
     border: 1.5px solid var(--border);
-    padding: 10px 10px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
 
-  .payment-status-row { display: flex; gap: 6px; }
+  .payment-status-row { display: flex; gap: 8px; }
 
   .pay-option { flex: 1; }
   .pay-option input[type="radio"] { display: none; }
@@ -441,28 +328,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 4px;
+    padding: 8px 4px;
     border: 2px solid var(--border);
     cursor: pointer;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--mid);
     transition: all 0.15s;
     white-space: nowrap;
-    min-height: 44px;
-    text-align: center;
   }
 
   .pay-option input[type="radio"]:checked + label.paid   { border-color: var(--green); background: var(--green); color: var(--white); }
   .pay-option input[type="radio"]:checked + label.no-fee { border-color: #2980b9; background: #2980b9; color: var(--white); }
   .pay-option input[type="radio"]:checked + label.waived { border-color: #7d3c98; background: #7d3c98; color: var(--white); }
 
+  .pay-option label:hover { border-color: var(--ink); }
+
   .pay-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-  /* ===================== NOTES + SIG ===================== */
+  /* BOTTOM ROW: NOTES + SIG */
   .bottom-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -472,27 +359,26 @@
 
   .sig-line {
     border-bottom: 2px solid var(--ink);
-    height: 36px;
+    height: 32px;
     width: 100%;
     margin-bottom: 2px;
   }
 
-  /* ===================== STAFF FOOTER ===================== */
+  /* STAFF FOOTER */
   .staff-footer {
     background: var(--ink);
     color: var(--white);
-    padding: 10px 16px;
+    padding: 9px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 16px;
   }
 
   .staff-badge {
     background: var(--yellow);
     color: var(--ink);
-    padding: 3px 8px;
+    padding: 2px 8px;
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800;
     font-size: 10px;
@@ -501,278 +387,131 @@
     flex-shrink: 0;
   }
 
-  .staff-fields { display: flex; gap: 12px; flex: 1; }
+  .staff-fields { display: flex; gap: 16px; }
 
-  .staff-field { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .staff-field { display: flex; flex-direction: column; gap: 3px; }
   .staff-field label { color: rgba(255,255,255,0.5); font-size: 9px; letter-spacing: 1px; }
 
   .staff-field input {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.2);
     color: var(--white);
-    padding: 8px 8px;
+    padding: 5px 8px;
     font-family: 'Barlow', sans-serif;
-    font-size: 16px;
-    width: 100%;
-    min-height: 44px;
-    -webkit-appearance: none;
-    border-radius: 0;
+    font-size: 12px;
+    width: 150px;
   }
 
   .staff-field input::placeholder { color: rgba(255,255,255,0.25); }
 
-  /* ===================== INSTALL BANNER ===================== */
-  .install-banner {
-    display: none;
-    background: var(--green);
-    color: white;
-    padding: 10px 16px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  /* ===================== PRINT STYLES ===================== */
+  @media print {
+    @page {
+      size: letter portrait;
+      margin: 0.5in 0.5in 0.5in 0.5in;
+    }
+
+    body {
+      background: white;
+      padding: 0;
+      display: block;
+    }
+
+    .toolbar { display: none !important; }
+
+    .page {
+      box-shadow: none;
+      border: 1.5px solid #000;
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .add-row-btn { display: none !important; }
+
+    /* Ensure backgrounds print */
+    .header        { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .date-strip    { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .staff-footer  { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .totals-box    { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .items-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .pay-option label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    input, select, textarea {
+      border: 1px solid #bbb !important;
+      background: white !important;
+    }
+
+    .staff-field input {
+      background: rgba(0,0,0,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.3) !important;
+    }
   }
 
-  .install-banner.show { display: flex; }
-
-  .btn-install {
-    background: white;
-    color: var(--green);
-    border: none;
-    padding: 7px 14px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    min-height: 36px;
-  }
-
-  .install-dismiss {
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.7);
-    font-size: 18px;
-    cursor: pointer;
-    padding: 4px 8px;
-    min-height: 36px;
-    display: flex;
-    align-items: center;
-  }
-
-  /* iOS install hint */
-  .ios-install-hint {
-    display: none;
-    background: #1c1c1e;
-    color: white;
-    padding: 14px 16px;
-    font-size: 13px;
-    line-height: 1.6;
-    text-align: center;
-    position: relative;
-  }
-
-  .ios-install-hint.show { display: block; }
-  .ios-install-hint .close-hint {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.6);
-    font-size: 18px;
-    cursor: pointer;
-    min-height: 36px;
-    min-width: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .share-icon {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 3px;
-    vertical-align: middle;
-    position: relative;
-    margin: 0 3px;
-    top: -1px;
-  }
-
-  /* ===================== RESPONSIVE ===================== */
   @media (max-width: 540px) {
     .grid-2 { grid-template-columns: 1fr; }
     .full { grid-column: 1; }
     .summary-payment-row { grid-template-columns: 1fr; }
     .bottom-row { grid-template-columns: 1fr; }
     .staff-fields { flex-direction: column; gap: 8px; }
-    .pay-details { grid-template-columns: 1fr; }
     .header { flex-direction: column; align-items: flex-start; }
-    .header-right { align-self: flex-end; }
-    .toolbar-label { display: none; }
+    .toolbar { flex-wrap: wrap; }
   }
-
-  /* ===================== PRINT ===================== */
-
-  /* ---- FULLSCREEN SIG MODAL ---- */
-  .sig-modal {
-    display:none !important; position:fixed !important; inset:0 !important; z-index:9000 !important;
-    background:var(--ink); flex-direction:column;
-    padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
-  }
-  .sig-modal.open { display:flex !important; }
-  .sig-modal-header {
-    background:var(--green); color:#fff; padding:14px 18px;
-    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
-  }
-  .sig-modal-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
-  .sig-modal-canvas-wrap {
-    flex:1; position:relative; margin:12px; background:#fff;
-    border:2px solid rgba(255,255,255,.2); border-radius:4px; overflow:hidden;
-    min-height:0;
-  }
-  .sig-modal-canvas-wrap canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; }
-  .sig-modal-baseline { position:absolute; bottom:28%; left:5%; right:5%; border-top:1.5px dashed rgba(0,0,0,.15); pointer-events:none; }
-  .sig-modal-x { position:absolute; bottom:calc(28% + 6px); left:5%; font-size:18px; color:rgba(0,0,0,.2); pointer-events:none; }
-  .sig-modal-actions { display:flex; gap:10px; padding:10px 12px; flex-shrink:0; }
-  .sig-modal-clear { flex:1; background:rgba(255,255,255,.1); color:rgba(255,255,255,.7); border:1.5px solid rgba(255,255,255,.2); font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; min-height:50px; cursor:pointer; border-radius:2px; }
-  .sig-modal-done { flex:2; background:var(--green); color:#fff; border:none; font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; min-height:50px; cursor:pointer; border-radius:2px; opacity:.4; pointer-events:none; }
-  .sig-modal-done.ready { opacity:1; pointer-events:all; }
-  .sig-tap-hint { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; font-size:12px; color:#aaa; letter-spacing:.5px; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; gap:6px; }
-  .sig-has-data .sig-tap-hint { display:none; }
-
-  /* ---- SAVE OVERLAY ---- */
+  /* SAVE OVERLAY */
   .save-overlay { display:none; position:fixed; inset:0; z-index:9001; background:rgba(0,0,0,.92); flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px; }
   .save-overlay.open { display:flex; }
   .save-overlay img { max-width:100%; max-height:75vh; border:2px solid #fff; }
   .save-overlay-msg { font-family:'Barlow Condensed',sans-serif; font-size:14px; letter-spacing:1px; color:#fff; text-align:center; line-height:1.6; }
   .save-overlay-close { background:var(--green); color:#fff; border:none; padding:12px 28px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-radius:2px; min-height:48px; }
-  .btn-save { background:#f5c518; color:#1a1a1a; }
-
-  @media print {
-    @page { size: letter portrait; margin: 0.45in; }
-
-    body { background: white; padding: 0; display: block; }
-    .toolbar, .install-banner, .ios-install-hint, .scroll-hint,
-    .sig-modal, .save-overlay { display: none !important; }
-
-    /* Reset mobile — full width, no shadow */
-    .page {
-      box-shadow: none !important;
-      border: 1.5px solid #000 !important;
-      max-width: 100% !important; width: 100% !important;
-      margin: 0 !important;
-    }
-
-    /* Restore multi-column grids (undo mobile stacking) */
-    .grid-2              { grid-template-columns: 1fr 1fr !important; }
-    .full                { grid-column: 1 / -1 !important; }
-    .summary-payment-row { grid-template-columns: 1fr 1.4fr !important; }
-    .bottom-row          { grid-template-columns: 1fr 1fr !important; }
-    .pay-details         { grid-template-columns: 1fr 1fr !important; }
-    .staff-fields        { flex-direction: row !important; gap: 12px !important; }
-
-    /* Items table */
-    .table-scroll-wrapper { overflow: visible !important; border: none !important; }
-    .items-table          { min-width: auto !important; }
-    .add-row-btn          { display: none !important; }
-    .scroll-hint          { display: none !important; }
-
-    /* Compact spacing */
-    .body    { padding: 10px 14px 6px !important; }
-    .section { margin-bottom: 8px !important; }
-    .bottom-row          { margin-bottom: 8px !important; }
-    .summary-payment-row { margin-bottom: 8px !important; }
-
-    /* Compact field sizes */
-    label { font-size: 8px !important; }
-    input[type="text"], input[type="tel"], input[type="number"],
-    input[type="date"], select {
-      font-size: 10px !important; min-height: 22px !important;
-      padding: 2px 6px !important;
-      border: 1px solid #bbb !important;
-      background: white !important;
-    }
-    textarea {
-      font-size: 10px !important; min-height: 44px !important;
-      padding: 3px 6px !important;
-      border: 1px solid #bbb !important;
-      background: white !important;
-    }
-
-    /* Items table cells */
-    .items-table td input, .items-table td select {
-      font-size: 10px !important; min-height: 20px !important;
-      padding: 2px 4px !important;
-    }
-    .items-table th { padding: 5px 7px !important; font-size: 9px !important; }
-    .items-table td { padding: 3px 5px !important; }
-
-    /* Payment buttons compact */
-    .pay-option label { padding: 5px 4px !important; min-height: 28px !important; font-size: 10px !important; }
-    .payment-box { padding: 6px 8px !important; gap: 5px !important; }
-    .totals-box  { padding: 6px 10px !important; }
-    .total-row .t-val { font-size: 16px !important; }
-
-    /* Signature box */
-    #sigBox      { height: 52px !important; }
-    #sigPreview  { display: block !important; }
-    .sig-tap-hint { display: none !important; }
-
-    /* Header compact */
-    .header { padding: 10px 14px 8px !important; }
-    .company-name { font-size: 18px !important; }
-    .recycle-icon { width: 28px !important; height: 28px !important; }
-    .form-number-val { font-size: 16px !important; }
-    .date-strip { padding: 4px 14px !important; font-size: 11px !important; }
-
-    /* Staff footer */
-    .staff-footer { padding: 7px 14px !important; }
-    .staff-field input {
-      background: rgba(0,0,0,0.06) !important;
-      border: 1px solid rgba(255,255,255,0.3) !important;
-    }
-
-    /* Color-accurate backgrounds */
-    .header, .date-strip, .staff-footer, .totals-box,
-    .items-table th, .pay-option label {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-  }
+  .btn-save { background: #f5c518; color: #1a1a1a; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+  /* ===================== SAVE AS IMAGE ===================== */
+  async function saveAsImage() {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '⏳'; btn.disabled = true;
+    try {
+      const page = document.querySelector('.page');
+      const styleTag = document.createElement('style');
+      styleTag.id = 'save-override';
+      styleTag.textContent = `
+        .grid-2              { grid-template-columns: 1fr 1fr !important; }
+        .full                { grid-column: 1 / -1 !important; }
+        .summary-payment-row { grid-template-columns: 1fr 1.4fr !important; }
+        .bottom-row          { grid-template-columns: 1fr 1fr !important; }
+        .pay-details         { grid-template-columns: 1fr 1fr !important; }
+        .staff-fields        { flex-direction: row !important; gap: 12px !important; }
+        .table-scroll-wrapper{ overflow: visible !important; }
+        .items-table         { min-width: auto !important; }
+      `;
+      document.head.appendChild(styleTag);
+      const origW = page.style.width, origMax = page.style.maxWidth;
+      page.style.width = '900px'; page.style.maxWidth = '900px';
+      await new Promise(r => setTimeout(r, 250));
+      const canvas = await html2canvas(page, {
+        scale: 2, useCORS: true, backgroundColor: '#ffffff',
+        logging: false, scrollY: 0,
+        windowWidth: 920, windowHeight: page.scrollHeight
+      });
+      page.style.width = origW; page.style.maxWidth = origMax;
+      document.getElementById('save-override').remove();
+      const img = document.getElementById('saveOverlayImg');
+      img.src = canvas.toDataURL('image/png');
+      document.getElementById('saveOverlay').classList.add('open');
+    } catch(e) { alert('Could not save: ' + e.message); }
+    btn.innerHTML = orig; btn.disabled = false;
+  }
+
+</script>
 </head>
 <body>
 
-<!-- STICKY TOOLBAR -->
+<!-- TOOLBAR (hidden on print) -->
 <div class="toolbar">
-  <span class="toolbar-label">Precision E-Cycle — Drop-Off</span>
-  <button class="btn btn-new" onclick="newForm()">↺ New</button>
-  <button class="btn btn-save" onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
-  <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
-</div>
-
-<!-- INSTALL BANNER (Android / non-iOS PWA) -->
-<div class="install-banner" id="installBanner">
-  <span>📲 Add to your Home Screen for quick access</span>
-  <button class="btn-install" id="installBtn">Install App</button>
-  <button class="install-dismiss" onclick="dismissBanner()" aria-label="Dismiss">×</button>
-</div>
-
-<!-- iOS INSTALL HINT -->
-<div class="ios-install-hint" id="iosHint">
-  <button class="close-hint" onclick="dismissIosHint()" aria-label="Close">×</button>
-  To add this to your iPhone Home Screen:<br>
-  Tap <strong>Share</strong> (<svg style="width:16px;height:16px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>)
-  then tap <strong>"Add to Home Screen"</strong>
+  <span class="toolbar-label">Precision E-Cycle — Drop-Off Form</span>
+  <button class="btn btn-new" onclick="newForm()">↺ &nbsp;New Form</button>
+  <button class="btn btn-save" onclick="saveAsImage()">💾 &nbsp;Save</button>
+  <button class="btn btn-print" onclick="window.print()">🖨 &nbsp;Print</button>
 </div>
 
 <div class="page">
@@ -780,7 +519,13 @@
   <!-- HEADER -->
   <div class="header">
     <div class="header-left">
-      
+      <svg class="recycle-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 5L29 17H15L22 5Z" fill="white" opacity="0.95"/>
+        <path d="M35 29L28 17H42L35 29Z" fill="white" opacity="0.85"/>
+        <path d="M9 29L2 17H16L9 29Z" fill="white" opacity="0.75"/>
+        <path d="M9 29H35" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+        <circle cx="22" cy="23" r="4.5" fill="none" stroke="white" stroke-width="2.2"/>
+      </svg>
       <div>
         <div class="company-name">Precision E-Cycle</div>
         <div class="company-tag">Electronics Recycling — Drop-Off Receipt</div>
@@ -806,15 +551,15 @@
       <div class="grid-2">
         <div class="field full">
           <label>Full Name</label>
-          <input type="text" inputmode="text" autocomplete="name" placeholder="First and Last Name">
+          <input type="text" placeholder="First and Last Name">
         </div>
         <div class="field">
           <label>Phone (optional)</label>
-          <input type="tel" inputmode="tel" autocomplete="tel" placeholder="(___) ___-____">
+          <input type="tel" placeholder="(___) ___-____">
         </div>
         <div class="field">
           <label>ID / Reference # (optional)</label>
-          <input type="text" inputmode="text" placeholder="">
+          <input type="text" placeholder="">
         </div>
       </div>
     </div>
@@ -822,43 +567,40 @@
     <!-- ITEMS -->
     <div class="section">
       <div class="section-title">Items Dropped Off</div>
-      <p class="scroll-hint">← Scroll table sideways if needed</p>
-      <div class="table-scroll-wrapper">
-        <table class="items-table" id="itemsTable">
-          <thead>
-            <tr>
-              <th style="width:36%">Item / Material Type</th>
-              <th style="width:20%">Category</th>
-              <th class="center" style="width:11%">Qty</th>
-              <th style="width:19%">Weight / Notes</th>
-              <th class="center" style="width:14%">Fee ($)</th>
-            </tr>
-          </thead>
-          <tbody id="itemsBody">
-            <tr>
-              <td><input type="text" placeholder="e.g. CRT Monitor"></td>
-              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-              <td class="center"><input type="number" inputmode="numeric" min="1" value="1" oninput="recalc()"></td>
-              <td><input type="text" placeholder="e.g. 12 lbs"></td>
-              <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-            </tr>
-            <tr>
-              <td><input type="text" placeholder=""></td>
-              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-              <td class="center"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
-              <td><input type="text" placeholder=""></td>
-              <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-            </tr>
-            <tr>
-              <td><input type="text" placeholder=""></td>
-              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-              <td class="center"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
-              <td><input type="text" placeholder=""></td>
-              <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <table class="items-table" id="itemsTable">
+        <thead>
+          <tr>
+            <th style="width:36%">Item / Material Type</th>
+            <th style="width:20%">Category</th>
+            <th class="center" style="width:11%">Qty</th>
+            <th style="width:19%">Weight / Notes</th>
+            <th class="center" style="width:14%">Fee ($)</th>
+          </tr>
+        </thead>
+        <tbody id="itemsBody">
+          <tr>
+            <td><input type="text" placeholder="e.g. CRT Monitor"></td>
+            <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+            <td class="center"><input type="number" min="1" value="1" oninput="recalc()"></td>
+            <td><input type="text" placeholder="e.g. 12 lbs"></td>
+            <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+          </tr>
+          <tr>
+            <td><input type="text" placeholder=""></td>
+            <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+            <td class="center"><input type="number" min="1" oninput="recalc()"></td>
+            <td><input type="text" placeholder=""></td>
+            <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+          </tr>
+          <tr>
+            <td><input type="text" placeholder=""></td>
+            <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+            <td class="center"><input type="number" min="1" oninput="recalc()"></td>
+            <td><input type="text" placeholder=""></td>
+            <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+          </tr>
+        </tbody>
+      </table>
       <button class="add-row-btn" onclick="addRow()">＋ Add Item</button>
     </div>
 
@@ -906,7 +648,7 @@
           </div>
           <div class="field">
             <label>Amount Collected ($)</label>
-            <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+            <input type="number" min="0" step="0.01" placeholder="0.00">
           </div>
         </div>
       </div>
@@ -924,15 +666,11 @@
         <div class="section-title">Customer Acknowledgement</div>
         <div class="field" style="margin-bottom:10px">
           <label>Customer Signature</label>
-          <div id="sigBox" style="border:1.5px solid var(--border);background:#fff;position:relative;height:80px;cursor:pointer;" onclick="openSigModal()">
-            <img id="sigPreview" style="position:absolute;inset:0;width:100%;height:100%;display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:calc(100% - 8px);width:auto;max-width:calc(100% - 8px);">
-            <div class="sig-tap-hint">✏️ Tap to Sign</div>
-            <button onclick="event.stopPropagation();clearSig()" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:11px;color:#aaa;cursor:pointer;padding:2px 6px;font-family:'Barlow',sans-serif;z-index:2;">✕ Clear</button>
-          </div>
+          <div class="sig-line"></div>
         </div>
-        <div class="field" style="margin-bottom:10px">
+        <div class="field">
           <label>Date</label>
-          <input type="text" id="sigDate" placeholder="MM/DD/YYYY" inputmode="text">
+          <div class="sig-line"></div>
         </div>
         <p style="font-size:10px; color:#999; margin-top:6px; line-height:1.5">
           Customer confirms all items listed have been dropped off and applicable fees have been paid.
@@ -948,7 +686,7 @@
     <div class="staff-fields">
       <div class="staff-field">
         <label>Accepted By (Staff Name)</label>
-        <input type="text" autocomplete="name" placeholder="">
+        <input type="text" placeholder="">
       </div>
       <div class="staff-field">
         <label>Drop-Off Bay / Zone</label>
@@ -960,15 +698,8 @@
 </div><!-- /page -->
 
 <script>
-  /* ===================== CORE FORM LOGIC ===================== */
   function genFormNum() {
-    const now = new Date();
-    const mm   = String(now.getMonth() + 1).padStart(2, '0');
-    const dd   = String(now.getDate()).padStart(2, '0');
-    const yyyy = String(now.getFullYear());
-    const HH   = String(now.getHours()).padStart(2, '0');
-    const MM   = String(now.getMinutes()).padStart(2, '0');
-    return '#' + mm + dd + yyyy + HH + MM;
+    return '#' + (Math.floor(Math.random() * 900000) + 100000);
   }
 
   function stampDateTime() {
@@ -979,9 +710,11 @@
       now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
   }
 
+  // Init
   document.getElementById('formNum').textContent = genFormNum();
   stampDateTime();
 
+  // Wire up existing row inputs
   document.querySelectorAll('#itemsBody input[type="number"]').forEach(i => {
     i.addEventListener('input', recalc);
   });
@@ -992,14 +725,12 @@
     row.innerHTML = `
       <td><input type="text" placeholder=""></td>
       <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-      <td class="center"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+      <td class="center"><input type="number" min="1" oninput="recalc()"></td>
       <td><input type="text" placeholder=""></td>
-      <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+      <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
     `;
     tbody.appendChild(row);
     recalc();
-    // Scroll new row into view
-    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function recalc() {
@@ -1016,293 +747,31 @@
 
   function newForm() {
     if (!confirm('Clear this form and start a new one?')) return;
+    // Reset all text/tel inputs
     document.querySelectorAll('input[type="text"], input[type="tel"]').forEach(i => i.value = '');
+    // Reset numbers
     document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+    // Reset selects
     document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    // Reset textarea
     document.querySelectorAll('textarea').forEach(t => t.value = '');
+    // Reset radio
     document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    // Remove added rows (keep first 3)
     const tbody = document.getElementById('itemsBody');
     while (tbody.rows.length > 3) tbody.deleteRow(tbody.rows.length - 1);
+    // New form number + timestamp
     document.getElementById('formNum').textContent = genFormNum();
-    document.getElementById('sigDate').value = '';
-    clearSig();
     stampDateTime();
     recalc();
-    localStorage.removeItem('dropoff_form');
     window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-
-  /* ===================== SIGNATURE PAD (fullscreen modal) ===================== */
-  let _sc = null, _sx = null;
-  let _sd = false, _hasMark = false;
-  function _initSigCanvas() {
-    if (!_sc) {
-      _sc = document.getElementById('sigCanvas');
-      _sx = _sc.getContext('2d');
-    }
-  }
-
-  function _initCanvas() {
-    const wrap = document.getElementById('sigModalWrap');
-    const r = wrap.getBoundingClientRect();
-    _sc.width = r.width || 300;
-    _sc.height = r.height || 300;
-    _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2.5; _sx.lineCap='round'; _sx.lineJoin='round';
-  }
-
-  function openSigModal() {
-    _initSigCanvas();
-    document.getElementById('sigModal').classList.add('open');
-    _hasMark = false;
-    document.getElementById('sigModalDone').classList.remove('ready');
-    requestAnimationFrame(() => {
-      const wrap = document.getElementById('sigModalWrap');
-      const r = wrap.getBoundingClientRect();
-      _sc.width = r.width || 300; _sc.height = r.height || 300;
-      _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2.5; _sx.lineCap='round'; _sx.lineJoin='round';
-    });
-  }
-
-  function sigModalClear() {
-    if (!_sx) return;
-    _sx.clearRect(0,0,_sc.width,_sc.height);
-    _hasMark = false;
-    document.getElementById('sigModalDone').classList.remove('ready');
-  }
-
-
-  /* ---- CROP SIGNATURE TO CONTENT ---- */
-  function cropSigCanvas(srcCanvas) {
-    const ctx = srcCanvas.getContext('2d');
-    const w = srcCanvas.width, h = srcCanvas.height;
-    const data = ctx.getImageData(0, 0, w, h).data;
-    let minX=w, minY=h, maxX=0, maxY=0, found=false;
-    for (let y=0; y<h; y++) {
-      for (let x=0; x<w; x++) {
-        const a = data[(y*w+x)*4+3];
-        if (a > 20) {
-          if (x<minX) minX=x; if (x>maxX) maxX=x;
-          if (y<minY) minY=y; if (y>maxY) maxY=y;
-          found=true;
-        }
-      }
-    }
-    if (!found) return srcCanvas.toDataURL('image/png');
-    // Add padding
-    const pad = 12;
-    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
-    maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
-    const cw=maxX-minX, ch=maxY-minY;
-    const out = document.createElement('canvas');
-    out.width=cw; out.height=ch;
-    out.getContext('2d').drawImage(srcCanvas, minX,minY,cw,ch, 0,0,cw,ch);
-    return out.toDataURL('image/png');
-  }
-
-  function sigModalDone() {
-    if (!_hasMark) return;
-    const dataURL = cropSigCanvas(_sc);
-    // Show in preview box
-    const preview = document.getElementById('sigPreview');
-    preview.src = dataURL;
-    preview.style.display = 'block';
-    document.getElementById('sigBox').classList.add('sig-has-data');
-    // Save to localStorage
-    localStorage.setItem('dropoff_sig', dataURL);
-    // Close modal
-    document.getElementById('sigModal').classList.remove('open');
-  }
-
-  function clearSig() {
-    document.getElementById('sigPreview').style.display = 'none';
-    document.getElementById('sigPreview').src = '';
-    document.getElementById('sigBox').classList.remove('sig-has-data');
-    localStorage.removeItem('dropoff_sig');
-    if (_sx) _sx.clearRect(0,0,_sc.width,_sc.height);
-    _hasMark = false;
-  }
-
-  function _sigPos(e) {
-    const r=_sc.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
-    return {x:(s.clientX-r.left)*(_sc.width/r.width), y:(s.clientY-r.top)*(_sc.height/r.height)};
-  }
-  // Event listeners attached after DOM ready so canvas exists
-  document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('sigCanvas');
-    if (!canvas) return;
-    canvas.addEventListener('mousedown',  e=>{_initSigCanvas();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);});
-    canvas.addEventListener('mousemove',  e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');});
-    canvas.addEventListener('mouseup',    ()=>_sd=false);
-    canvas.addEventListener('mouseleave', ()=>_sd=false);
-    canvas.addEventListener('touchstart',e=>{e.preventDefault();_initSigCanvas();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);},{passive:false});
-    canvas.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');},{passive:false});
-    canvas.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
-  });
-
-  /* ===================== LOCAL STORAGE AUTO-SAVE ===================== */
-  function saveToStorage() {
-    const data = {};
-    document.querySelectorAll('input[type="text"],input[type="tel"],input[type="number"],textarea,select').forEach((el,i) => {
-      data['f'+i] = el.value;
-    });
-    const r = document.querySelector('input[type="radio"]:checked');
-    if (r) data['radio_payment'] = r.value;
-    localStorage.setItem('dropoff_form', JSON.stringify(data));
-  }
-
-  function loadFromStorage() {
-    // Load fields
-    const saved = localStorage.getItem('dropoff_form');
-    if (saved) {
-      const data = JSON.parse(saved);
-      document.querySelectorAll('input[type="text"],input[type="tel"],input[type="number"],textarea,select').forEach((el,i) => {
-        if (data['f'+i] !== undefined) el.value = data['f'+i];
-      });
-      if (data['radio_payment']) {
-        const r = document.querySelector('input[type="radio"][value="'+data['radio_payment']+'"]');
-        if (r) r.checked = true;
-      }
-    }
-    // Load signature
-    const sig = localStorage.getItem('dropoff_sig');
-    if (sig) {
-      const preview = document.getElementById('sigPreview');
-      preview.src = sig;
-      preview.style.display = 'block';
-      document.getElementById('sigBox').classList.add('sig-has-data');
-    }
-    recalc();
-  }
-
-  document.addEventListener('input', saveToStorage);
-  document.addEventListener('change', saveToStorage);
-  window.addEventListener('load', loadFromStorage);
-
-  /* ===================== SAVE AS IMAGE ===================== */
-  async function saveAsImage() {
-    const btn = document.getElementById('saveImgBtn');
-    const orig = btn.textContent;
-    btn.textContent='⏳…'; btn.disabled=true;
-    try {
-      const page = document.querySelector('.page');
-      // Inject override styles — same technique as TOC
-      const styleTag = document.createElement('style');
-      styleTag.id = 'save-override';
-      styleTag.textContent = `
-        .grid-2              { grid-template-columns: 1fr 1fr !important; }
-        .full                { grid-column: 1 / -1 !important; }
-        .summary-payment-row { grid-template-columns: 1fr 1.4fr !important; }
-        .bottom-row          { grid-template-columns: 1fr 1fr !important; }
-        .pay-details         { grid-template-columns: 1fr 1fr !important; }
-        .staff-fields        { flex-direction: row !important; gap: 12px !important; }
-        .table-scroll-wrapper{ overflow: visible !important; }
-        .items-table         { min-width: auto !important; }
-        .header              { flex-direction: row !important; align-items: center !important; }
-        .header-right        { align-self: auto !important; }
-        input, select, textarea { font-size: 13px !important; min-height: 28px !important; }
-        .items-table td input, .items-table td select { font-size: 13px !important; min-height: 26px !important; }
-      `;
-      document.head.appendChild(styleTag);
-      const origW = page.style.width, origMax = page.style.maxWidth;
-      page.style.width = '900px'; page.style.maxWidth = '900px';
-      await new Promise(r => setTimeout(r, 250));
-      const canvas = await html2canvas(page, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff',
-        logging: false, scrollY: 0,
-        windowWidth: 920, windowHeight: page.scrollHeight
-      });
-      page.style.width = origW; page.style.maxWidth = origMax;
-      document.getElementById('save-override').remove();
-      const img = document.getElementById('saveOverlayImg');
-      img.src = canvas.toDataURL('image/png');
-      document.getElementById('saveOverlay').classList.add('open');
-    } catch(e) { alert('Could not save: ' + e.message); }
-    btn.textContent = orig; btn.disabled = false;
-  }
-
-  /* ===================== PWA INSTALL ===================== */
-  let deferredPrompt = null;
-
-  // Android / Chrome — catch install prompt
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBanner').classList.add('show');
-  });
-
-  document.getElementById('installBtn').addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    document.getElementById('installBanner').classList.remove('show');
-  });
-
-  function dismissBanner() {
-    document.getElementById('installBanner').classList.remove('show');
-  }
-
-  // iOS Safari — show manual instructions if not already installed
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isInStandaloneMode = window.navigator.standalone === true;
-  const hintDismissed = sessionStorage.getItem('iosHintDismissed');
-
-  if (isIOS && !isInStandaloneMode && !hintDismissed) {
-    document.getElementById('iosHint').classList.add('show');
-  }
-
-  function dismissIosHint() {
-    document.getElementById('iosHint').classList.remove('show');
-    sessionStorage.setItem('iosHintDismissed', '1');
-  }
-
-  /* ===================== SERVICE WORKER (offline support) ===================== */
-  if ('serviceWorker' in navigator) {
-    // Inline service worker via blob — caches the page for offline use
-    const swCode = `
-      const CACHE = 'ecycle-v1';
-      self.addEventListener('install', e => {
-        e.waitUntil(
-          caches.open(CACHE).then(c => c.addAll([self.location.pathname]))
-        );
-        self.skipWaiting();
-      });
-      self.addEventListener('activate', e => {
-        e.waitUntil(clients.claim());
-      });
-      self.addEventListener('fetch', e => {
-        e.respondWith(
-          caches.match(e.request).then(r => r || fetch(e.request))
-        );
-      });
-    `;
-    const swBlob = new Blob([swCode], { type: 'application/javascript' });
-    const swURL = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swURL).catch(() => {});
   }
 </script>
 
 
-<!-- FULLSCREEN SIGNATURE MODAL -->
-<div class="sig-modal" id="sigModal">
-  <div class="sig-modal-header">
-    <div class="sig-modal-title">✏️ Sign Here</div>
-    <span style="font-size:11px;color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;">Customer Acknowledgement</span>
-  </div>
-  <div class="sig-modal-canvas-wrap" id="sigModalWrap">
-    <canvas id="sigCanvas"></canvas>
-    <div class="sig-modal-baseline"></div>
-    <div class="sig-modal-x">✕</div>
-  </div>
-  <div class="sig-modal-actions">
-    <button class="sig-modal-clear" onclick="sigModalClear()">Clear</button>
-    <button class="sig-modal-done" id="sigModalDone" onclick="sigModalDone()">✓ Done</button>
-  </div>
-</div>
-
-<!-- SAVE IMAGE OVERLAY -->
+<!-- SAVE OVERLAY -->
 <div class="save-overlay" id="saveOverlay">
-  <div class="save-overlay-msg">📱 <strong>iPhone:</strong> Long-press the image below → Save to Photos<br><span style="opacity:.6;font-size:12px;">Or screenshot this screen</span></div>
+  <div class="save-overlay-msg">📱 <strong>iPhone:</strong> Long-press the image → Save to Photos<br><span style="opacity:.6;font-size:12px;">Or take a screenshot</span></div>
   <img id="saveOverlayImg" src="" alt="Form snapshot">
   <button class="save-overlay-close" onclick="document.getElementById('saveOverlay').classList.remove('open')">✕ Close</button>
 </div>
