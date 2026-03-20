@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="E-Cycle Drop-Off">
+<meta name="theme-color" content="#1a4f8a">
+<title>Precision E-Cycle — Drop-Off Form</title>
+
+<!-- PWA Manifest (inline via JS since we're single-file) -->
+<script>
+  const manifestData = {
+    name: "Precision E-Cycle Drop-Off",
+    short_name: "E-Cycle",
+    description: "Electronics recycling drop-off form",
+    start_url: "./Drop_Off_Form_Mobile.html",
+    display: "standalone",
+    background_color: "#f0ede8",
+    theme_color: "#1a4f8a",
+    orientation: "portrait",
+    icons: [
+      { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232d6a2d'/><text y='130' font-size='120' text-anchor='middle' x='96'>♻</text></svg>", sizes: "192x192", type: "image/svg+xml" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifestData)], {type:'application/json'});
+  const manifestURL = URL.createObjectURL(blob);
+  document.write('<link rel="manifest" href="' + manifestURL + '">');
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --green: #1a4f8a;
+    --green-light: #2563b0;
+    --green-pale: #e8f0fb;
+    --ink: #1a1a1a;
+    --mid: #555;
+    --border: #c5c5c5;
+    --bg: #f0ede8;
+    --white: #ffffff;
+    --yellow: #f5c518;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  html { height: -webkit-fill-available; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 calc(16px + var(--safe-bottom));
+    gap: 0;
+    /* Room for sticky toolbar at top */
+    padding-top: calc(60px + var(--safe-top));
+  }
+
+  /* ===================== TOOLBAR (STICKY) ===================== */
+  .toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--ink);
+    padding: 10px 14px;
+    padding-top: calc(10px + var(--safe-top));
+    padding-left: calc(14px + var(--safe-left));
+    padding-right: calc(14px + var(--safe-right));
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .toolbar-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    /* Minimum 44px touch target */
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity 0.15s, transform 0.1s;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .btn:active { transform: scale(0.95); opacity: 0.8; }
+
+  .btn-new {
+    background: rgba(255,255,255,0.12);
+    color: var(--white);
+    border: 1.5px solid rgba(255,255,255,0.25);
+  }
+
+  .btn-print {
+    background: var(--green);
+    color: var(--white);
+  }
+
+  /* ===================== PAGE CARD ===================== */
+  .page {
+    width: 100%;
+    max-width: 720px;
+    background: var(--white);
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    /* On wider screens show side borders */
+  }
+
+  @media (min-width: 740px) {
+    .page {
+      border: 2px solid var(--ink);
+      box-shadow: 5px 5px 0 var(--green);
+      margin: 16px;
+    }
+    body { padding-top: calc(72px + var(--safe-top)); }
+  }
+
+  /* ===================== HEADER ===================== */
+  .header {
+    background: var(--green);
+    color: var(--white);
+    padding: 14px 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .recycle-icon { width: 36px; height: 36px; flex-shrink: 0; }
+
+  .company-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .company-tag {
+    font-size: 10px;
+    font-weight: 500;
+    opacity: 0.75;
+    margin-top: 3px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .header-right { text-align: right; flex-shrink: 0; }
+
+  .doc-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .form-number-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  /* ===================== DATE STRIP ===================== */
+  .date-strip {
+    background: var(--ink);
+    color: var(--white);
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .date-strip span { opacity: 0.45; }
+  .date-strip strong { opacity: 1; font-weight: 600; }
+
+  /* ===================== BODY ===================== */
+  .body { padding: 14px 14px 8px; }
+
+  .section { margin-bottom: 14px; }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--green);
+    border-bottom: 1.5px solid var(--green-pale);
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .full { grid-column: 1 / -1; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+
+  label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--mid);
+  }
+
+  /* ===================== INPUTS — larger touch targets ===================== */
+  input[type="text"],
+  input[type="tel"],
+  input[type="number"],
+  select,
+  textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 0;
+    /* 16px font prevents iOS auto-zoom */
+    font-size: 16px;
+    padding: 10px 10px;
+    font-family: 'Barlow', sans-serif;
+    color: var(--ink);
+    background: var(--white);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+    /* Minimum height for comfortable touch */
+    min-height: 44px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--green);
+    background: var(--green-pale);
+  }
+
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* ===================== ITEMS TABLE ===================== */
+  .table-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    margin-bottom: 2px;
+  }
+
+  .items-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+
+  .items-table th {
+    background: var(--ink);
+    color: var(--white);
+    padding: 8px 7px;
+    text-align: left;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .items-table th.center,
+  .items-table td.center { text-align: center; }
+
+  .items-table td {
+    padding: 4px 5px;
+    border-bottom: 1px solid #e8e8e8;
+    vertical-align: middle;
+  }
+
+  .items-table tr:nth-child(even) td { background: #fafafa; }
+
+  .items-table td input,
+  .items-table td select {
+    border: 1px solid #ddd;
+    padding: 8px 6px;
+    font-size: 16px; /* Prevents iOS zoom */
+    width: 100%;
+    background: transparent;
+    min-height: 40px;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .items-table td input[type="number"] { text-align: center; }
+
+  .items-table td select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    padding-right: 22px;
+  }
+
+  /* Scroll hint label */
+  .scroll-hint {
+    font-size: 10px;
+    color: var(--mid);
+    opacity: 0.7;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .add-row-btn {
+    margin-top: 8px;
+    background: none;
+    border: 1.5px dashed var(--green);
+    color: var(--green);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-height: 44px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .add-row-btn:active { background: var(--green-pale); }
+
+  /* ===================== TOTALS + PAYMENT ===================== */
+  .summary-payment-row {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .totals-box {
+    background: var(--green-pale);
+    border: 1.5px solid var(--green);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .total-row .t-label {
+    font-weight: 600;
+    color: var(--mid);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .total-row .t-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .total-divider { border: none; border-top: 1px solid #b3c9f0; }
+
+  /* ===================== PAYMENT ===================== */
+  .payment-box {
+    border: 1.5px solid var(--border);
+    padding: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .payment-status-row { display: flex; gap: 6px; }
+
+  .pay-option { flex: 1; }
+  .pay-option input[type="radio"] { display: none; }
+
+  .pay-option label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 4px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--mid);
+    transition: all 0.15s;
+    white-space: nowrap;
+    min-height: 44px;
+    text-align: center;
+  }
+
+  .pay-option input[type="radio"]:checked + label.paid   { border-color: var(--green); background: var(--green); color: var(--white); }
+  .pay-option input[type="radio"]:checked + label.no-fee { border-color: #2980b9; background: #2980b9; color: var(--white); }
+  .pay-option input[type="radio"]:checked + label.waived { border-color: #7d3c98; background: #7d3c98; color: var(--white); }
+
+  .pay-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* ===================== NOTES + SIG ===================== */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .sig-line {
+    border-bottom: 2px solid var(--ink);
+    height: 36px;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  /* ===================== STAFF FOOTER ===================== */
+  .staff-footer {
+    background: var(--ink);
+    color: var(--white);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .staff-badge {
+    background: var(--yellow);
+    color: var(--ink);
+    padding: 3px 8px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .staff-fields { display: flex; gap: 12px; flex: 1; }
+
+  .staff-field { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .staff-field label { color: rgba(255,255,255,0.5); font-size: 9px; letter-spacing: 1px; }
+
+  .staff-field input {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    padding: 8px 8px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    width: 100%;
+    min-height: 44px;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+
+  .staff-field input::placeholder { color: rgba(255,255,255,0.25); }
+
+  /* ===================== INSTALL BANNER ===================== */
+  .install-banner {
+    display: none;
+    background: var(--green);
+    color: white;
+    padding: 10px 16px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .install-banner.show { display: flex; }
+
+  .btn-install {
+    background: white;
+    color: var(--green);
+    border: none;
+    padding: 7px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    min-height: 36px;
+  }
+
+  .install-dismiss {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* iOS install hint */
+  .ios-install-hint {
+    display: none;
+    background: #1c1c1e;
+    color: white;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+    position: relative;
+  }
+
+  .ios-install-hint.show { display: block; }
+  .ios-install-hint .close-hint {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 18px;
+    cursor: pointer;
+    min-height: 36px;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .share-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 3px;
+    vertical-align: middle;
+    position: relative;
+    margin: 0 3px;
+    top: -1px;
+  }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 540px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .full { grid-column: 1; }
+    .summary-payment-row { grid-template-columns: 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+    .staff-fields { flex-direction: column; gap: 8px; }
+    .pay-details { grid-template-columns: 1fr; }
+    .header { flex-direction: column; align-items: flex-start; }
+    .header-right { align-self: flex-end; }
+    .toolbar-label { display: none; }
+  }
+
+  /* ===================== PRINT ===================== */
+  @media print {
+    @page { size: letter portrait; margin: 0.5in; }
+
+    body { background: white; padding: 0; display: block; }
+    .toolbar, .install-banner, .ios-install-hint, .scroll-hint { display: none !important; }
+
+    .page { box-shadow: none; border: 1.5px solid #000; max-width: 100%; width: 100%; }
+    .add-row-btn { display: none !important; }
+
+    .table-scroll-wrapper { overflow: visible; border: none; }
+    .items-table { min-width: auto; }
+
+    .header, .date-strip, .staff-footer, .totals-box, .items-table th, .pay-option label {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    input, select, textarea {
+      border: 1px solid #bbb !important;
+      background: white !important;
+      font-size: 12px !important;
+    }
+
+    #sigCanvas { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    .staff-field input {
+      background: rgba(0,0,0,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+  }
+  /* ---- SAVE BUTTON ---- */
+  .btn-save { background: #f5c518; color: #1a1a1a; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<!-- STICKY TOOLBAR -->
+<div class="toolbar">
+  <span class="toolbar-label">Precision E-Cycle — Drop-Off</span>
+  <button class="btn btn-new" onclick="newForm()">↺ New</button>
+  <button class="btn btn-save" onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
+  <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
+</div>
+
+<!-- INSTALL BANNER (Android / non-iOS PWA) -->
+<div class="install-banner" id="installBanner">
+  <span>📲 Add to your Home Screen for quick access</span>
+  <button class="btn-install" id="installBtn">Install App</button>
+  <button class="install-dismiss" onclick="dismissBanner()" aria-label="Dismiss">×</button>
+</div>
+
+<!-- iOS INSTALL HINT -->
+<div class="ios-install-hint" id="iosHint">
+  <button class="close-hint" onclick="dismissIosHint()" aria-label="Close">×</button>
+  To add this to your iPhone Home Screen:<br>
+  Tap <strong>Share</strong> (<svg style="width:16px;height:16px;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>)
+  then tap <strong>"Add to Home Screen"</strong>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <img src="data:image/png;base64,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" class="recycle-icon" alt="Precision E-Cycle Logo" style="width:42px;height:42px;object-fit:contain;">
+      <div>
+        <div class="company-name">Precision E-Cycle</div>
+        <div class="company-tag">Electronics Recycling — Drop-Off Receipt</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="doc-label">Form No.</div>
+      <div class="form-number-val" id="formNum">#—</div>
+    </div>
+  </div>
+
+  <!-- DATE STRIP -->
+  <div class="date-strip">
+    <span>Date &nbsp;<strong id="todayDate"></strong></span>
+    <span>Time &nbsp;<strong id="todayTime"></strong></span>
+  </div>
+
+  <div class="body">
+
+    <!-- CUSTOMER INFO -->
+    <div class="section">
+      <div class="section-title">Customer Information</div>
+      <div class="grid-2">
+        <div class="field full">
+          <label>Full Name</label>
+          <input type="text" inputmode="text" autocomplete="name" placeholder="First and Last Name">
+        </div>
+        <div class="field">
+          <label>Phone (optional)</label>
+          <input type="tel" inputmode="tel" autocomplete="tel" placeholder="(___) ___-____">
+        </div>
+        <div class="field">
+          <label>ID / Reference # (optional)</label>
+          <input type="text" inputmode="text" placeholder="">
+        </div>
+      </div>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="section">
+      <div class="section-title">Items Dropped Off</div>
+      <p class="scroll-hint">← Scroll table sideways if needed</p>
+      <div class="table-scroll-wrapper">
+        <table class="items-table" id="itemsTable">
+          <thead>
+            <tr>
+              <th style="width:36%">Item / Material Type</th>
+              <th style="width:20%">Category</th>
+              <th class="center" style="width:11%">Qty</th>
+              <th style="width:19%">Weight / Notes</th>
+              <th class="center" style="width:14%">Fee ($)</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody">
+            <tr>
+              <td><input type="text" placeholder="e.g. CRT Monitor"></td>
+              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+              <td class="center"><input type="number" inputmode="numeric" min="1" value="1" oninput="recalc()"></td>
+              <td><input type="text" placeholder="e.g. 12 lbs"></td>
+              <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+            </tr>
+            <tr>
+              <td><input type="text" placeholder=""></td>
+              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+              <td class="center"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+              <td><input type="text" placeholder=""></td>
+              <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+            </tr>
+            <tr>
+              <td><input type="text" placeholder=""></td>
+              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+              <td class="center"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+              <td><input type="text" placeholder=""></td>
+              <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addRow()">＋ Add Item</button>
+    </div>
+
+    <!-- SUMMARY + PAYMENT -->
+    <div class="summary-payment-row">
+
+      <div class="totals-box">
+        <div class="total-row">
+          <span class="t-label">Total Items</span>
+          <span class="t-val" id="totalQty">0</span>
+        </div>
+        <hr class="total-divider">
+        <div class="total-row">
+          <span class="t-label">Total Fee Due</span>
+          <span class="t-val" id="totalFee">$0.00</span>
+        </div>
+      </div>
+
+      <div class="payment-box">
+        <div class="section-title" style="margin-bottom:7px">Payment Status</div>
+        <div class="payment-status-row">
+          <div class="pay-option">
+            <input type="radio" name="payment" id="paid" value="paid">
+            <label for="paid" class="paid">✓ Paid</label>
+          </div>
+          <div class="pay-option">
+            <input type="radio" name="payment" id="nofee" value="nofee">
+            <label for="nofee" class="no-fee">○ No Fee</label>
+          </div>
+          <div class="pay-option">
+            <input type="radio" name="payment" id="waived" value="waived">
+            <label for="waived" class="waived">~ Waived</label>
+          </div>
+        </div>
+        <div class="pay-details">
+          <div class="field">
+            <label>Payment Method</label>
+            <select>
+              <option value="">— select —</option>
+              <option>Cash</option>
+              <option>Credit / Debit</option>
+              <option>Check</option>
+              <option>N/A</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Amount Collected ($)</label>
+            <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NOTES + SIGNATURE -->
+    <div class="bottom-row">
+      <div class="section">
+        <div class="section-title">Notes / Special Handling</div>
+        <textarea placeholder="Special handling, rejected items, or other notes…"></textarea>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Customer Acknowledgement</div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Customer Signature</label>
+          <div style="border:1.5px solid var(--border); background:#fff; position:relative; height:80px;">
+            <canvas id="sigCanvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
+            <button onclick="clearSig()" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:11px;color:#aaa;cursor:pointer;padding:2px 6px;font-family:'Barlow',sans-serif;">✕ Clear</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Date</label>
+          <input type="text" id="sigDate" placeholder="MM/DD/YYYY" inputmode="numeric">
+        </div>
+        <p style="font-size:10px; color:#999; margin-top:6px; line-height:1.5">
+          Customer confirms all items listed have been dropped off and applicable fees have been paid.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- STAFF FOOTER -->
+  <div class="staff-footer">
+    <span class="staff-badge">Staff Use Only</span>
+    <div class="staff-fields">
+      <div class="staff-field">
+        <label>Accepted By (Staff Name)</label>
+        <input type="text" autocomplete="name" placeholder="">
+      </div>
+      <div class="staff-field">
+        <label>Drop-Off Bay / Zone</label>
+        <input type="text" placeholder="e.g. Bay 3">
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+  /* ===================== CORE FORM LOGIC ===================== */
+  function genFormNum() {
+    const now = new Date();
+    const mm   = String(now.getMonth() + 1).padStart(2, '0');
+    const dd   = String(now.getDate()).padStart(2, '0');
+    const yyyy = String(now.getFullYear());
+    const HH   = String(now.getHours()).padStart(2, '0');
+    const MM   = String(now.getMinutes()).padStart(2, '0');
+    return '#' + mm + dd + yyyy + HH + MM;
+  }
+
+  function stampDateTime() {
+    const now = new Date();
+    document.getElementById('todayDate').textContent =
+      now.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+    document.getElementById('todayTime').textContent =
+      now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  document.getElementById('formNum').textContent = genFormNum();
+  stampDateTime();
+
+  document.querySelectorAll('#itemsBody input[type="number"]').forEach(i => {
+    i.addEventListener('input', recalc);
+  });
+
+  function addRow() {
+    const tbody = document.getElementById('itemsBody');
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><input type="text" placeholder=""></td>
+      <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+      <td class="center"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+      <td><input type="text" placeholder=""></td>
+      <td class="center"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+    `;
+    tbody.appendChild(row);
+    recalc();
+    // Scroll new row into view
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function recalc() {
+    const rows = document.querySelectorAll('#itemsBody tr');
+    let totalQty = 0, totalFee = 0;
+    rows.forEach(r => {
+      const inputs = r.querySelectorAll('input[type="number"]');
+      totalQty += parseFloat(inputs[0]?.value) || 0;
+      totalFee += parseFloat(inputs[1]?.value) || 0;
+    });
+    document.getElementById('totalQty').textContent = totalQty || 0;
+    document.getElementById('totalFee').textContent = '$' + totalFee.toFixed(2);
+  }
+
+  function newForm() {
+    if (!confirm('Clear this form and start a new one?')) return;
+    document.querySelectorAll('input[type="text"], input[type="tel"]').forEach(i => i.value = '');
+    document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+    document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    document.querySelectorAll('textarea').forEach(t => t.value = '');
+    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    const tbody = document.getElementById('itemsBody');
+    while (tbody.rows.length > 3) tbody.deleteRow(tbody.rows.length - 1);
+    document.getElementById('formNum').textContent = genFormNum();
+    document.getElementById('sigDate').value = '';
+    clearSig();
+    stampDateTime();
+    recalc();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  /* ===================== SIGNATURE PAD ===================== */
+  const _sc = document.getElementById('sigCanvas');
+  const _sx = _sc.getContext('2d');
+  let _sd = false;
+  function _sigResize() {
+    const r = _sc.getBoundingClientRect();
+    const img = _sc.width > 0 ? _sx.getImageData(0,0,_sc.width,_sc.height) : null;
+    _sc.width = r.width; _sc.height = r.height;
+    if(img) _sx.putImageData(img,0,0);
+    _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2; _sx.lineCap='round'; _sx.lineJoin='round';
+  }
+  window.addEventListener('resize', _sigResize);
+  setTimeout(_sigResize, 100);
+  function _sigPos(e) {
+    const r=_sc.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
+    return {x:(s.clientX-r.left)*(_sc.width/r.width), y:(s.clientY-r.top)*(_sc.height/r.height)};
+  }
+  _sc.addEventListener('mousedown',  e=>{_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);});
+  _sc.addEventListener('mousemove',  e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();});
+  _sc.addEventListener('mouseup',    ()=>_sd=false);
+  _sc.addEventListener('mouseleave', ()=>_sd=false);
+  _sc.addEventListener('touchstart',e=>{e.preventDefault();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);},{passive:false});
+  _sc.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();},{passive:false});
+  _sc.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
+  function clearSig(){_sx.clearRect(0,0,_sc.width,_sc.height);}
+
+  /* ===================== SAVE AS IMAGE ===================== */
+  async function saveAsImage() {
+    const btn = document.getElementById('saveImgBtn');
+    btn.textContent = '⏳ Saving…';
+    btn.disabled = true;
+    try {
+      const canvas = await html2canvas(document.getElementById('mainForm') || document.querySelector('.page'), {
+        scale: 2, useCORS: true, backgroundColor: '#ffffff',
+        logging: false
+      });
+      const link = document.createElement('a');
+      const now = new Date();
+      const ts = String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + now.getFullYear();
+      link.download = 'dropoff-' + ts + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch(e) {
+      alert('Could not save image: ' + e.message);
+    }
+    btn.textContent = '💾 Save';
+    btn.disabled = false;
+  }
+
+  /* ===================== PWA INSTALL ===================== */
+  let deferredPrompt = null;
+
+  // Android / Chrome — catch install prompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
+  });
+
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+  });
+
+  function dismissBanner() {
+    document.getElementById('installBanner').classList.remove('show');
+  }
+
+  // iOS Safari — show manual instructions if not already installed
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandaloneMode = window.navigator.standalone === true;
+  const hintDismissed = sessionStorage.getItem('iosHintDismissed');
+
+  if (isIOS && !isInStandaloneMode && !hintDismissed) {
+    document.getElementById('iosHint').classList.add('show');
+  }
+
+  function dismissIosHint() {
+    document.getElementById('iosHint').classList.remove('show');
+    sessionStorage.setItem('iosHintDismissed', '1');
+  }
+
+  /* ===================== SERVICE WORKER (offline support) ===================== */
+  if ('serviceWorker' in navigator) {
+    // Inline service worker via blob — caches the page for offline use
+    const swCode = `
+      const CACHE = 'ecycle-v1';
+      self.addEventListener('install', e => {
+        e.waitUntil(
+          caches.open(CACHE).then(c => c.addAll([self.location.pathname]))
+        );
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', e => {
+        e.waitUntil(clients.claim());
+      });
+      self.addEventListener('fetch', e => {
+        e.respondWith(
+          caches.match(e.request).then(r => r || fetch(e.request))
+        );
+      });
+    `;
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    const swURL = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swURL).catch(() => {});
+  }
+</script>
+
+</body>
+</html>

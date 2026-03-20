@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a4f8a">
+<title>Precision E-Cycle — Forms</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --blue:#1a4f8a; --blue-light:#29abe2; --blue-pale:#e8f0fb; --ink:#1a1a1a; --white:#fff; --bg:#f0f4f8; }
+  body { font-family:'Barlow',sans-serif; background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px; }
+  .card { width:100%; max-width:480px; background:var(--white); border:2px solid var(--blue-light); box-shadow:0 4px 24px rgba(26,79,138,.13); overflow:hidden; }
+  .header { background:var(--blue); padding:22px 24px 18px; display:flex; align-items:center; gap:16px; }
+  .header img { width:52px; height:52px; object-fit:contain; flex-shrink:0; }
+  .company { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--white); line-height:1; }
+  .tagline { font-size:11px; color:rgba(255,255,255,.65); margin-top:3px; letter-spacing:.5px; }
+  .body { padding:24px; }
+  .prompt { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--blue); margin-bottom:16px; border-bottom:1.5px solid var(--blue-pale); padding-bottom:8px; }
+  .form-btn { display:flex; align-items:center; gap:16px; width:100%; background:var(--white); border:2px solid var(--blue-light); padding:16px 18px; margin-bottom:12px; cursor:pointer; text-decoration:none; transition:background .15s,border-color .15s,transform .1s; border-radius:2px; }
+  .form-btn:last-child { margin-bottom:0; }
+  .form-btn:hover { background:var(--blue-pale); border-color:var(--blue); }
+  .form-btn:active { transform:scale(.98); }
+  .form-icon { width:44px; height:44px; flex-shrink:0; background:var(--blue); display:flex; align-items:center; justify-content:center; font-size:22px; border-radius:2px; }
+  .form-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--ink); line-height:1; }
+  .form-desc { font-size:12px; color:#777; margin-top:3px; line-height:1.4; }
+  .form-arrow { margin-left:auto; font-size:22px; color:var(--blue-light); flex-shrink:0; }
+  .footer { background:var(--ink); padding:10px 24px; font-size:10px; color:rgba(255,255,255,.35); letter-spacing:.5px; text-align:center; font-family:'Barlow Condensed',sans-serif; text-transform:uppercase; }
+  .footer a { color:rgba(255,255,255,.45); text-decoration:none; }
+  .color-bar { height:5px; background:linear-gradient(90deg,var(--blue) 0%,var(--blue-light) 100%); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <img src="data:image/png;base64,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" alt="Logo">
+    <div class="header-text">
+      <div class="company">Precision E-Cycle</div>
+      <div class="tagline">Electronics Recycling — Select a Form</div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="prompt">Select a form to fill out</div>
+    <a class="form-btn" href="dropoff.html">
+      <div class="form-icon">📋</div>
+      <div>
+        <div class="form-title">Drop-Off Form</div>
+        <div class="form-desc">Customer drop-off receipt for electronics recycling</div>
+      </div>
+      <div class="form-arrow">›</div>
+    </a>
+    <a class="form-btn" href="toc.html">
+      <div class="form-icon">🔄</div>
+      <div>
+        <div class="form-title">Transfer of Custody</div>
+        <div class="form-desc">Chain of custody document for transferring materials</div>
+      </div>
+      <div class="form-arrow">›</div>
+    </a>
+  </div>
+  <div class="color-bar"></div>
+  <div class="footer">
+    <a href="https://www.precisionecycle.com">www.precisionecycle.com</a>
+    &nbsp;·&nbsp; 4100 Industrial Ave, STE D, Lincoln NE 68504
+  </div>
+</div>
+</body>
+</html>
