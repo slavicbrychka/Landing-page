@@ -2,530 +2,369 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="E-Cycle Drop-Off">
+<meta name="theme-color" content="#1a4f8a">
 <title>Precision E-Cycle — Drop-Off Form</title>
+
+<script>
+  const _md = {
+    name:"Precision E-Cycle Drop-Off", short_name:"Drop-Off",
+    start_url:"./dropoff.html", display:"standalone",
+    background_color:"#f0f4f8", theme_color:"#1a4f8a",
+    icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231a4f8a'/><text y='130' font-size='120' text-anchor='middle' x='96'>♻</text></svg>",sizes:"192x192",type:"image/svg+xml"}]
+  };
+  document.write('<link rel="manifest" href="'+URL.createObjectURL(new Blob([JSON.stringify(_md)],{type:'application/json'}))+'">');
+</script>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
   :root {
-    --green: #2d6a2d;
-    --green-light: #3d8a3d;
-    --green-pale: #e8f4e8;
-    --ink: #1a1a1a;
-    --mid: #555;
-    --border: #c5c5c5;
-    --bg: #f0ede8;
-    --white: #ffffff;
-    --yellow: #f5c518;
+    --green:#1a4f8a; --green-mid:#2563b0; --green-light:#29abe2;
+    --green-pale:#e8f0fb; --ink:#1a1a1a; --mid:#555;
+    --border:#c5c5c5; --bg:#f0ede8; --white:#fff; --yellow:#f5c518;
+    --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+    --safe-left:env(safe-area-inset-left,0px); --safe-right:env(safe-area-inset-right,0px);
   }
 
+  html { height:-webkit-fill-available; }
   body {
-    font-family: 'Barlow', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 40px;
-    gap: 16px;
+    font-family:'Barlow',sans-serif; background:var(--bg);
+    min-height:100vh; min-height:-webkit-fill-available;
+    display:flex; flex-direction:column; align-items:center;
+    padding:0 0 calc(24px + var(--safe-bottom));
+    padding-top:calc(58px + var(--safe-top));
   }
 
-  /* TOOLBAR */
+  /* ---- TOOLBAR ---- */
   .toolbar {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    background: var(--ink);
-    padding: 10px 18px;
-    width: 100%;
-    max-width: 720px;
-    border-radius: 2px;
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; gap:8px; align-items:center; background:var(--ink);
+    padding:10px 14px;
+    padding-top:calc(10px + var(--safe-top));
+    padding-left:calc(14px + var(--safe-left));
+    padding-right:calc(14px + var(--safe-right));
+    box-shadow:0 2px 8px rgba(0,0,0,.3);
   }
-
   .toolbar-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
-    margin-right: auto;
+    font-family:'Barlow Condensed',sans-serif; font-size:11px;
+    letter-spacing:1.5px; text-transform:uppercase;
+    color:rgba(255,255,255,.45); margin-right:auto;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-
   .btn {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    padding: 8px 18px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    transition: opacity 0.15s, transform 0.1s;
+    font-family:'Barlow Condensed',sans-serif; font-size:13px;
+    font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    min-height:44px; min-width:44px; padding:10px 14px; border:none;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    gap:6px; transition:opacity .15s,transform .1s; border-radius:2px; flex-shrink:0;
   }
+  .btn:active { transform:scale(.95); opacity:.8; }
+  .btn-new   { background:rgba(255,255,255,.12); color:#fff; border:1.5px solid rgba(255,255,255,.25); }
+  .btn-save  { background:var(--yellow); color:var(--ink); }
+  .btn-print { background:var(--green); color:#fff; }
 
-  .btn:hover { opacity: 0.85; }
-  .btn:active { transform: scale(0.97); }
-
-  .btn-new {
-    background: rgba(255,255,255,0.12);
-    color: var(--white);
-    border: 1.5px solid rgba(255,255,255,0.25);
-  }
-
-  .btn-print {
-    background: var(--green);
-    color: var(--white);
-  }
-
-  /* PAGE */
+  /* ---- PAGE ---- */
   .page {
-    width: 100%;
-    max-width: 720px;
-    background: var(--white);
-    border: 2px solid var(--ink);
-    box-shadow: 5px 5px 0 var(--green);
+    width:100%; max-width:760px; background:#fff;
+    border:2px solid var(--green);
+    box-shadow:0 2px 16px rgba(45,106,45,.12);
+  }
+  @media(min-width:780px){
+    .page{ margin:16px; }
+    body{ padding-top:calc(70px + var(--safe-top)); }
   }
 
-  /* HEADER */
+  /* ---- HEADER ---- */
   .header {
-    background: var(--green);
-    color: var(--white);
-    padding: 16px 22px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    background:var(--green); color:#fff; padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
   }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  .header-left { display:flex; align-items:center; gap:12px; }
+  .header-icon {
+    width:40px; height:40px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
   }
-
-  .recycle-icon { width: 42px; height: 42px; flex-shrink: 0; }
-
   .company-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: 0.5px;
-    line-height: 1;
-    text-transform: uppercase;
+    font-family:'Barlow Condensed',sans-serif; font-weight:800;
+    font-size:24px; letter-spacing:.5px; line-height:1; text-transform:uppercase;
   }
+  .company-tag { font-size:10px; opacity:.75; margin-top:3px; letter-spacing:1px; text-transform:uppercase; }
+  .header-right { text-align:right; flex-shrink:0; }
+  .doc-label { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; opacity:.8; }
+  .form-number-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; letter-spacing:1px; }
 
-  .company-tag {
-    font-size: 11px;
-    font-weight: 500;
-    opacity: 0.75;
-    margin-top: 3px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .header-right { text-align: right; flex-shrink: 0; }
-
-  .doc-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    opacity: 0.8;
-  }
-
-  .form-number-val {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: 1px;
-  }
-
-  /* DATE STRIP */
+  /* ---- DATE STRIP ---- */
   .date-strip {
-    background: var(--ink);
-    color: var(--white);
-    padding: 6px 22px;
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    background:var(--ink); color:#fff; padding:6px 18px;
+    display:flex; align-items:center; gap:24px;
+    font-family:'Barlow Condensed',sans-serif; font-size:12px; letter-spacing:1px; text-transform:uppercase;
+  }
+  .date-strip span { opacity:.45; }
+  .date-strip strong { opacity:1; font-weight:600; }
+
+  /* ---- SECTION HEADER ---- */
+  .sec-header {
+    font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700;
+    letter-spacing:2.5px; text-transform:uppercase; color:var(--green);
+    border-bottom:1.5px solid var(--green-pale); padding-bottom:4px; margin-bottom:10px;
   }
 
-  .date-strip span { opacity: 0.45; }
-  .date-strip strong { opacity: 1; font-weight: 600; }
+  /* ---- BODY ---- */
+  .body { padding:14px 18px 10px; }
+  .section { margin-bottom:14px; }
 
-  /* BODY */
-  .body { padding: 16px 22px 10px; }
+  /* ---- FIELD GRIDS ---- */
+  .fg-1  { display:grid; grid-template-columns:1fr; gap:10px; }
+  .fg-2  { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .fg-sp { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; }
+  .fg-bot{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+  .full  { grid-column:1/-1; }
 
-  .section { margin-bottom: 14px; }
-
-  .section-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--green);
-    border-bottom: 1.5px solid var(--green-pale);
-    padding-bottom: 4px;
-    margin-bottom: 10px;
+  /* ---- FIELD ---- */
+  .fld { display:flex; flex-direction:column; gap:3px; }
+  .fld label {
+    font-size:9px; font-weight:700; letter-spacing:1.5px;
+    text-transform:uppercase; color:var(--mid);
+  }
+  .fld input, .fld select, .fld textarea {
+    border:none; border-bottom:1.5px solid var(--border);
+    font-size:15px; font-family:'Barlow',sans-serif;
+    color:var(--ink); background:transparent; outline:none;
+    width:100%; -webkit-appearance:none; appearance:none;
+    min-height:36px; padding:2px 0; transition:border-color .15s;
+  }
+  .fld input:focus, .fld select:focus, .fld textarea:focus {
+    border-bottom-color:var(--green); background:var(--green-pale); padding:2px 4px;
+  }
+  /* iOS prevents zoom at 16px */
+  .fld input, .fld select, .fld textarea { font-size:16px; }
+  .fld textarea { resize:vertical; min-height:60px; }
+  .fld select {
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 4px center; padding-right:24px;
   }
 
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .full { grid-column: 1 / -1; }
-  .field { display: flex; flex-direction: column; gap: 3px; }
-
-  label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--mid);
-  }
-
-  input[type="text"],
-  input[type="tel"],
-  input[type="number"],
-  select,
-  textarea {
-    border: 1.5px solid var(--border);
-    border-radius: 0;
-    padding: 7px 9px;
-    font-family: 'Barlow', sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    background: var(--white);
-    outline: none;
-    width: 100%;
-    transition: border-color 0.15s;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--green);
-    background: var(--green-pale);
-  }
-
-  textarea { resize: vertical; min-height: 44px; }
-
-  /* ITEMS TABLE */
-  .items-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-
+  /* ---- ITEMS TABLE ---- */
+  .table-wrap { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--border); margin-bottom:2px; }
+  .items-table { width:100%; border-collapse:collapse; font-size:13px; min-width:480px; }
   .items-table th {
-    background: var(--ink);
-    color: var(--white);
-    padding: 6px 7px;
-    text-align: left;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    font-weight: 600;
+    background:var(--ink); color:#fff; padding:7px 8px; text-align:left;
+    font-family:'Barlow Condensed',sans-serif; font-size:9px; letter-spacing:1.5px;
+    text-transform:uppercase; font-weight:600; white-space:nowrap;
   }
-
-  .items-table th.center,
-  .items-table td.center { text-align: center; }
-
-  .items-table td {
-    padding: 4px 5px;
-    border-bottom: 1px solid #e8e8e8;
+  .items-table th.c, .items-table td.c { text-align:center; }
+  .items-table td { padding:4px 6px; border-bottom:1px solid #e8e8e8; vertical-align:middle; }
+  .items-table tr:nth-child(even) td { background:#fafafa; }
+  .items-table td input, .items-table td select {
+    border:1px solid #ddd; padding:6px 5px; font-size:16px;
+    width:100%; background:transparent; min-height:36px;
+    -webkit-appearance:none; appearance:none; border-radius:0;
+    font-family:'Barlow',sans-serif;
   }
-
-  .items-table tr:nth-child(even) td { background: #fafafa; }
-
-  .items-table td input,
+  .items-table td input[type="number"] { text-align:center; }
   .items-table td select {
-    border: 1px solid #ddd;
-    padding: 4px 6px;
-    font-size: 12px;
-    width: 100%;
-    background: transparent;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 5px center; padding-right:20px;
   }
-
-  .items-table td input[type="number"] { text-align: center; }
-
   .add-row-btn {
-    margin-top: 7px;
-    background: none;
-    border: 1.5px dashed var(--green);
-    color: var(--green);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    cursor: pointer;
-    transition: background 0.15s;
+    margin-top:8px; background:none; border:1.5px dashed var(--green); color:var(--green);
+    font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:600;
+    letter-spacing:1px; text-transform:uppercase; padding:10px 16px; cursor:pointer;
+    transition:background .15s; min-height:44px; width:100%;
+    display:flex; align-items:center; justify-content:center; gap:6px;
   }
+  .add-row-btn:active { background:var(--green-pale); }
 
-  .add-row-btn:hover { background: var(--green-pale); }
-
-  /* TOTALS + PAYMENT ROW */
-  .summary-payment-row {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
+  /* ---- TOTALS ---- */
   .totals-box {
-    background: var(--green-pale);
-    border: 1.5px solid var(--green);
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    justify-content: center;
+    background:var(--green-pale); border:1.5px solid var(--green);
+    padding:10px 14px; display:flex; flex-direction:column; gap:6px; justify-content:center;
   }
+  .total-row { display:flex; justify-content:space-between; align-items:center; }
+  .total-row .t-label { font-weight:600; color:var(--mid); font-size:11px; text-transform:uppercase; letter-spacing:.4px; }
+  .total-row .t-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:700; color:var(--ink); }
+  .total-divider { border:none; border-top:1px solid #b3c9f0; }
 
-  .total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .total-row .t-label {
-    font-weight: 600;
-    color: var(--mid);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-  }
-
-  .total-row .t-val {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--ink);
-  }
-
-  .total-divider { border: none; border-top: 1px solid #bdd9bd; }
-
-  /* PAYMENT */
-  .payment-box {
-    border: 1.5px solid var(--border);
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .payment-status-row { display: flex; gap: 8px; }
-
-  .pay-option { flex: 1; }
-  .pay-option input[type="radio"] { display: none; }
-
+  /* ---- PAYMENT ---- */
+  .payment-box { border:1.5px solid var(--border); padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+  .pay-row { display:flex; gap:6px; }
+  .pay-option { flex:1; }
+  .pay-option input[type="radio"] { display:none; }
   .pay-option label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 4px;
-    border: 2px solid var(--border);
-    cursor: pointer;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--mid);
-    transition: all 0.15s;
-    white-space: nowrap;
+    display:flex; align-items:center; justify-content:center;
+    padding:10px 4px; border:2px solid var(--border); cursor:pointer;
+    font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
+    letter-spacing:.6px; text-transform:uppercase; color:var(--mid);
+    transition:all .15s; white-space:nowrap; min-height:44px; text-align:center;
+  }
+  .pay-option input[type="radio"]:checked + label.paid   { border-color:var(--green); background:var(--green); color:#fff; }
+  .pay-option input[type="radio"]:checked + label.no-fee { border-color:#2980b9; background:#2980b9; color:#fff; }
+  .pay-option input[type="radio"]:checked + label.waived { border-color:#7d3c98; background:#7d3c98; color:#fff; }
+  .pay-details { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  /* ---- SIG BOX ---- */
+  .sig-box {
+    border:1.5px solid var(--border); background:#fff;
+    position:relative; height:80px; cursor:pointer;
+  }
+  .sig-box img {
+    display:none; position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    height:calc(100% - 8px); width:auto; max-width:calc(100% - 8px);
+  }
+  .sig-box.has-sig img { display:block; }
+  .sig-tap-hint {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#aaa; letter-spacing:.5px; font-family:'Barlow Condensed',sans-serif;
+    text-transform:uppercase; gap:6px; pointer-events:none;
+  }
+  .sig-box.has-sig .sig-tap-hint { display:none; }
+  .sig-clear-btn {
+    position:absolute; top:4px; right:6px; background:none; border:none;
+    font-size:11px; color:#bbb; cursor:pointer; padding:2px 4px; z-index:2;
+    font-family:'Barlow',sans-serif;
   }
 
-  .pay-option input[type="radio"]:checked + label.paid   { border-color: var(--green); background: var(--green); color: var(--white); }
-  .pay-option input[type="radio"]:checked + label.no-fee { border-color: #2980b9; background: #2980b9; color: var(--white); }
-  .pay-option input[type="radio"]:checked + label.waived { border-color: #7d3c98; background: #7d3c98; color: var(--white); }
+  /* ---- SIG LINE (date) ---- */
+  .sig-line { border-bottom:1.5px solid var(--border); height:36px; width:100%; }
 
-  .pay-option label:hover { border-color: var(--ink); }
-
-  .pay-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-  /* BOTTOM ROW: NOTES + SIG */
-  .bottom-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .sig-line {
-    border-bottom: 2px solid var(--ink);
-    height: 32px;
-    width: 100%;
-    margin-bottom: 2px;
-  }
-
-  /* STAFF FOOTER */
+  /* ---- STAFF FOOTER ---- */
   .staff-footer {
-    background: var(--ink);
-    color: var(--white);
-    padding: 9px 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    background:var(--ink); color:#fff; padding:10px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
   }
-
   .staff-badge {
-    background: var(--yellow);
-    color: var(--ink);
-    padding: 2px 8px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    flex-shrink: 0;
+    background:var(--yellow); color:var(--ink); padding:3px 8px;
+    font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:10px;
+    letter-spacing:1.5px; text-transform:uppercase; flex-shrink:0;
   }
-
-  .staff-fields { display: flex; gap: 16px; }
-
-  .staff-field { display: flex; flex-direction: column; gap: 3px; }
-  .staff-field label { color: rgba(255,255,255,0.5); font-size: 9px; letter-spacing: 1px; }
-
+  .staff-fields { display:flex; gap:14px; flex:1; }
+  .staff-field { display:flex; flex-direction:column; gap:3px; flex:1; }
+  .staff-field label { color:rgba(255,255,255,.5); font-size:9px; letter-spacing:1px; text-transform:uppercase; font-family:'Barlow Condensed',sans-serif; font-weight:700; }
   .staff-field input {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: var(--white);
-    padding: 5px 8px;
-    font-family: 'Barlow', sans-serif;
-    font-size: 12px;
-    width: 150px;
+    background:rgba(255,255,255,.1); border:none; border-bottom:1px solid rgba(255,255,255,.2);
+    color:#fff; padding:4px 2px; font-family:'Barlow',sans-serif; font-size:16px;
+    width:100%; min-height:36px; -webkit-appearance:none;
   }
+  .staff-field input::placeholder { color:rgba(255,255,255,.25); }
 
-  .staff-field input::placeholder { color: rgba(255,255,255,0.25); }
-
-  /* ===================== PRINT STYLES ===================== */
-  @media print {
-    @page {
-      size: letter portrait;
-      margin: 0.5in 0.5in 0.5in 0.5in;
-    }
-
-    body {
-      background: white;
-      padding: 0;
-      display: block;
-    }
-
-    .toolbar { display: none !important; }
-
-    .page {
-      box-shadow: none;
-      border: 1.5px solid #000;
-      max-width: 100%;
-      width: 100%;
-    }
-
-    .add-row-btn { display: none !important; }
-
-    /* Ensure backgrounds print */
-    .header        { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .date-strip    { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .staff-footer  { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .totals-box    { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .items-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .pay-option label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
-    input, select, textarea {
-      border: 1px solid #bbb !important;
-      background: white !important;
-    }
-
-    .staff-field input {
-      background: rgba(0,0,0,0.06) !important;
-      border: 1px solid rgba(255,255,255,0.3) !important;
-    }
+  /* ---- FULLSCREEN SIG MODAL ---- */
+  .sig-modal {
+    display:none; position:fixed; inset:0; z-index:9000; background:var(--ink);
+    flex-direction:column;
+    padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
   }
-
-  @media (max-width: 540px) {
-    .grid-2 { grid-template-columns: 1fr; }
-    .full { grid-column: 1; }
-    .summary-payment-row { grid-template-columns: 1fr; }
-    .bottom-row { grid-template-columns: 1fr; }
-    .staff-fields { flex-direction: column; gap: 8px; }
-    .header { flex-direction: column; align-items: flex-start; }
-    .toolbar { flex-wrap: wrap; }
+  .sig-modal.open { display:flex; }
+  .sig-modal-header {
+    background:var(--green); color:#fff; padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
   }
-  /* SAVE OVERLAY */
+  .sig-modal-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; letter-spacing:1px; text-transform:uppercase; }
+  .sig-modal-wrap {
+    flex:1; position:relative; margin:12px; background:#fff;
+    border:2px solid rgba(255,255,255,.2); border-radius:4px; overflow:hidden; min-height:0;
+  }
+  .sig-modal-wrap canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; }
+  .sig-baseline { position:absolute; bottom:28%; left:5%; right:5%; border-top:1.5px dashed rgba(0,0,0,.15); pointer-events:none; }
+  .sig-x-mark  { position:absolute; bottom:calc(28% + 6px); left:5%; font-size:18px; color:rgba(0,0,0,.2); pointer-events:none; }
+  .sig-modal-actions { display:flex; gap:10px; padding:10px 12px; flex-shrink:0; }
+  .sig-modal-clear { flex:1; background:rgba(255,255,255,.1); color:rgba(255,255,255,.7); border:1.5px solid rgba(255,255,255,.2); font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; min-height:50px; cursor:pointer; border-radius:2px; }
+  .sig-modal-done  { flex:2; background:var(--green); color:#fff; border:none; font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; min-height:50px; cursor:pointer; border-radius:2px; opacity:.4; pointer-events:none; }
+  .sig-modal-done.ready { opacity:1; pointer-events:all; }
+
+  /* ---- SAVE OVERLAY ---- */
   .save-overlay { display:none; position:fixed; inset:0; z-index:9001; background:rgba(0,0,0,.92); flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px; }
   .save-overlay.open { display:flex; }
   .save-overlay img { max-width:100%; max-height:75vh; border:2px solid #fff; }
   .save-overlay-msg { font-family:'Barlow Condensed',sans-serif; font-size:14px; letter-spacing:1px; color:#fff; text-align:center; line-height:1.6; }
   .save-overlay-close { background:var(--green); color:#fff; border:none; padding:12px 28px; font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-radius:2px; min-height:48px; }
-  .btn-save { background: #f5c518; color: #1a1a1a; }
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-  /* ===================== SAVE AS IMAGE ===================== */
-  async function saveAsImage() {
-    const btn = event.currentTarget;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '⏳'; btn.disabled = true;
-    try {
-      const page = document.querySelector('.page');
-      const styleTag = document.createElement('style');
-      styleTag.id = 'save-override';
-      styleTag.textContent = `
-        .grid-2              { grid-template-columns: 1fr 1fr !important; }
-        .full                { grid-column: 1 / -1 !important; }
-        .summary-payment-row { grid-template-columns: 1fr 1.4fr !important; }
-        .bottom-row          { grid-template-columns: 1fr 1fr !important; }
-        .pay-details         { grid-template-columns: 1fr 1fr !important; }
-        .staff-fields        { flex-direction: row !important; gap: 12px !important; }
-        .table-scroll-wrapper{ overflow: visible !important; }
-        .items-table         { min-width: auto !important; }
-      `;
-      document.head.appendChild(styleTag);
-      const origW = page.style.width, origMax = page.style.maxWidth;
-      page.style.width = '900px'; page.style.maxWidth = '900px';
-      await new Promise(r => setTimeout(r, 250));
-      const canvas = await html2canvas(page, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff',
-        logging: false, scrollY: 0,
-        windowWidth: 920, windowHeight: page.scrollHeight
-      });
-      page.style.width = origW; page.style.maxWidth = origMax;
-      document.getElementById('save-override').remove();
-      const img = document.getElementById('saveOverlayImg');
-      img.src = canvas.toDataURL('image/png');
-      document.getElementById('saveOverlay').classList.add('open');
-    } catch(e) { alert('Could not save: ' + e.message); }
-    btn.innerHTML = orig; btn.disabled = false;
+
+  /* ---- RESPONSIVE ---- */
+  @media(max-width:540px){
+    .fg-2,.fg-sp,.fg-bot,.pay-details { grid-template-columns:1fr; }
+    .full { grid-column:1; }
+    .staff-fields { flex-direction:column; gap:8px; }
+    .header { flex-direction:column; align-items:flex-start; }
+    .header-right { align-self:flex-end; }
+    .toolbar-label { display:none; }
   }
 
-</script>
+  /* ---- PRINT ---- */
+  @media print {
+    @page { size:letter portrait; margin:0.45in; }
+    body { background:white; padding:0; display:block; }
+    .toolbar, .sig-modal, .save-overlay, .add-row-btn { display:none !important; }
+    .page { box-shadow:none; border:1.5px solid var(--green); max-width:100%; width:100%; margin:0; }
+
+    /* Restore grids */
+    .fg-2  { grid-template-columns:1fr 1fr !important; }
+    .fg-sp { grid-template-columns:1fr 1.4fr !important; }
+    .fg-bot{ grid-template-columns:1fr 1fr !important; }
+    .pay-details { grid-template-columns:1fr 1fr !important; }
+    .staff-fields { flex-direction:row !important; gap:14px !important; }
+    .full { grid-column:1/-1 !important; }
+    .table-wrap { overflow:visible !important; border:none !important; }
+    .items-table { min-width:auto !important; }
+
+    /* Compact */
+    .body { padding:10px 16px 6px !important; }
+    .section { margin-bottom:8px !important; }
+    .fg-bot { margin-bottom:8px !important; }
+    .fld label { font-size:7px !important; }
+    .fld input, .fld select, .fld textarea { font-size:10px !important; min-height:18px !important; padding:1px 0 !important; }
+    .items-table th { padding:5px 7px !important; font-size:8px !important; }
+    .items-table td { padding:3px 5px !important; }
+    .items-table td input, .items-table td select { font-size:10px !important; min-height:18px !important; }
+    .pay-option label { padding:5px 4px !important; min-height:26px !important; font-size:10px !important; }
+    .payment-box { padding:6px 8px !important; gap:5px !important; }
+    .totals-box { padding:6px 10px !important; }
+    .total-row .t-val { font-size:16px !important; }
+    .sig-box { height:50px !important; }
+    .sig-box img { display:block !important; }
+    .sig-tap-hint { display:none !important; }
+    .sig-clear-btn { display:none !important; }
+    .sig-line { height:26px !important; }
+    .header { padding:10px 16px 8px !important; }
+    .company-name { font-size:18px !important; }
+    .form-number-val { font-size:16px !important; }
+    .date-strip { padding:4px 16px !important; font-size:11px !important; }
+    .staff-footer { padding:7px 16px !important; }
+    .staff-field input { font-size:10px !important; min-height:20px !important; }
+    p { font-size:9px !important; }
+
+    .header, .date-strip, .staff-footer, .totals-box, .items-table th, .pay-option label {
+      -webkit-print-color-adjust:exact; print-color-adjust:exact;
+    }
+    .staff-field input { background:rgba(0,0,0,.05) !important; }
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
-<!-- TOOLBAR (hidden on print) -->
+<!-- TOOLBAR -->
 <div class="toolbar">
-  <span class="toolbar-label">Precision E-Cycle — Drop-Off Form</span>
-  <button class="btn btn-new" onclick="newForm()">↺ &nbsp;New Form</button>
-  <button class="btn btn-save" onclick="saveAsImage()">💾 &nbsp;Save</button>
-  <button class="btn btn-print" onclick="window.print()">🖨 &nbsp;Print</button>
+  <span class="toolbar-label">Precision E-Cycle — Drop-Off</span>
+  <button class="btn btn-new"   onclick="newForm()">↺ New</button>
+  <button class="btn btn-save"  onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
+  <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
 </div>
 
-<div class="page">
+<!-- PAGE -->
+<div class="page" id="mainPage">
 
   <!-- HEADER -->
   <div class="header">
     <div class="header-left">
-      <svg class="recycle-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 5L29 17H15L22 5Z" fill="white" opacity="0.95"/>
-        <path d="M35 29L28 17H42L35 29Z" fill="white" opacity="0.85"/>
-        <path d="M9 29L2 17H16L9 29Z" fill="white" opacity="0.75"/>
-        <path d="M9 29H35" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
-        <circle cx="22" cy="23" r="4.5" fill="none" stroke="white" stroke-width="2.2"/>
-      </svg>
+      <div class="header-icon">
+        <img src="data:image/png;base64,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" alt="Precision E-Cycle Logo" style="width:40px;height:40px;object-fit:contain;">
+      </div>
       <div>
         <div class="company-name">Precision E-Cycle</div>
         <div class="company-tag">Electronics Recycling — Drop-Off Receipt</div>
@@ -547,132 +386,117 @@
 
     <!-- CUSTOMER INFO -->
     <div class="section">
-      <div class="section-title">Customer Information</div>
-      <div class="grid-2">
-        <div class="field full">
+      <div class="sec-header">Customer Information</div>
+      <div class="fg-1" style="gap:10px">
+        <div class="fld full">
           <label>Full Name</label>
-          <input type="text" placeholder="First and Last Name">
+          <input type="text" inputmode="text" autocomplete="name" placeholder="First and Last Name">
         </div>
-        <div class="field">
-          <label>Phone (optional)</label>
-          <input type="tel" placeholder="(___) ___-____">
-        </div>
-        <div class="field">
-          <label>ID / Reference # (optional)</label>
-          <input type="text" placeholder="">
+        <div class="fg-2">
+          <div class="fld">
+            <label>Phone (optional)</label>
+            <input type="tel" inputmode="tel" autocomplete="tel" placeholder="(___) ___-____">
+          </div>
+          <div class="fld">
+            <label>ID / Reference # (optional)</label>
+            <input type="text" inputmode="text">
+          </div>
         </div>
       </div>
     </div>
 
     <!-- ITEMS -->
     <div class="section">
-      <div class="section-title">Items Dropped Off</div>
-      <table class="items-table" id="itemsTable">
-        <thead>
-          <tr>
-            <th style="width:36%">Item / Material Type</th>
-            <th style="width:20%">Category</th>
-            <th class="center" style="width:11%">Qty</th>
-            <th style="width:19%">Weight / Notes</th>
-            <th class="center" style="width:14%">Fee ($)</th>
-          </tr>
-        </thead>
-        <tbody id="itemsBody">
-          <tr>
-            <td><input type="text" placeholder="e.g. CRT Monitor"></td>
-            <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-            <td class="center"><input type="number" min="1" value="1" oninput="recalc()"></td>
-            <td><input type="text" placeholder="e.g. 12 lbs"></td>
-            <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-          </tr>
-          <tr>
-            <td><input type="text" placeholder=""></td>
-            <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-            <td class="center"><input type="number" min="1" oninput="recalc()"></td>
-            <td><input type="text" placeholder=""></td>
-            <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-          </tr>
-          <tr>
-            <td><input type="text" placeholder=""></td>
-            <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-            <td class="center"><input type="number" min="1" oninput="recalc()"></td>
-            <td><input type="text" placeholder=""></td>
-            <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="sec-header">Items Dropped Off</div>
+      <div class="table-wrap">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width:36%">Item / Material Type</th>
+              <th style="width:20%">Category</th>
+              <th class="c" style="width:10%">Qty</th>
+              <th style="width:20%">Weight / Notes</th>
+              <th class="c" style="width:14%">Fee ($)</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody">
+            <tr>
+              <td><input type="text" placeholder="e.g. CRT Monitor"></td>
+              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+              <td class="c"><input type="number" inputmode="numeric" min="1" value="1" oninput="recalc()"></td>
+              <td><input type="text" placeholder="e.g. 12 lbs"></td>
+              <td class="c"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+            </tr>
+            <tr>
+              <td><input type="text"></td>
+              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+              <td class="c"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+              <td><input type="text"></td>
+              <td class="c"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+            </tr>
+            <tr>
+              <td><input type="text"></td>
+              <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+              <td class="c"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+              <td><input type="text"></td>
+              <td class="c"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <button class="add-row-btn" onclick="addRow()">＋ Add Item</button>
     </div>
 
-    <!-- SUMMARY + PAYMENT -->
-    <div class="summary-payment-row">
-
+    <!-- TOTALS + PAYMENT -->
+    <div class="fg-sp" style="margin-bottom:14px">
       <div class="totals-box">
-        <div class="total-row">
-          <span class="t-label">Total Items</span>
-          <span class="t-val" id="totalQty">0</span>
-        </div>
+        <div class="total-row"><span class="t-label">Total Items</span><span class="t-val" id="totalQty">0</span></div>
         <hr class="total-divider">
-        <div class="total-row">
-          <span class="t-label">Total Fee Due</span>
-          <span class="t-val" id="totalFee">$0.00</span>
-        </div>
+        <div class="total-row"><span class="t-label">Total Fee Due</span><span class="t-val" id="totalFee">$0.00</span></div>
       </div>
-
       <div class="payment-box">
-        <div class="section-title" style="margin-bottom:7px">Payment Status</div>
-        <div class="payment-status-row">
-          <div class="pay-option">
-            <input type="radio" name="payment" id="paid" value="paid">
-            <label for="paid" class="paid">✓ Paid</label>
-          </div>
-          <div class="pay-option">
-            <input type="radio" name="payment" id="nofee" value="nofee">
-            <label for="nofee" class="no-fee">○ No Fee</label>
-          </div>
-          <div class="pay-option">
-            <input type="radio" name="payment" id="waived" value="waived">
-            <label for="waived" class="waived">~ Waived</label>
-          </div>
+        <div class="sec-header" style="margin-bottom:6px">Payment Status</div>
+        <div class="pay-row">
+          <div class="pay-option"><input type="radio" name="payment" id="paid"   value="paid">  <label for="paid"   class="paid">✓ Paid</label></div>
+          <div class="pay-option"><input type="radio" name="payment" id="nofee"  value="nofee"> <label for="nofee"  class="no-fee">○ No Fee</label></div>
+          <div class="pay-option"><input type="radio" name="payment" id="waived" value="waived"><label for="waived" class="waived">~ Waived</label></div>
         </div>
         <div class="pay-details">
-          <div class="field">
+          <div class="fld">
             <label>Payment Method</label>
-            <select>
-              <option value="">— select —</option>
-              <option>Cash</option>
-              <option>Credit / Debit</option>
-              <option>Check</option>
-              <option>N/A</option>
-            </select>
+            <select><option value="">— select —</option><option>Cash</option><option>Credit / Debit</option><option>Check</option><option>N/A</option></select>
           </div>
-          <div class="field">
+          <div class="fld">
             <label>Amount Collected ($)</label>
-            <input type="number" min="0" step="0.01" placeholder="0.00">
+            <input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00">
           </div>
         </div>
       </div>
-
     </div>
 
-    <!-- NOTES + SIGNATURE -->
-    <div class="bottom-row">
+    <!-- NOTES + SIG -->
+    <div class="fg-bot">
       <div class="section">
-        <div class="section-title">Notes / Special Handling</div>
-        <textarea placeholder="Special handling, rejected items, or other notes…"></textarea>
+        <div class="sec-header">Notes / Special Handling</div>
+        <div class="fld">
+          <textarea placeholder="Special handling, rejected items, or other notes…"></textarea>
+        </div>
       </div>
-
       <div class="section">
-        <div class="section-title">Customer Acknowledgement</div>
-        <div class="field" style="margin-bottom:10px">
+        <div class="sec-header">Customer Acknowledgement</div>
+        <div class="fld" style="margin-bottom:10px">
           <label>Customer Signature</label>
-          <div class="sig-line"></div>
+          <div class="sig-box" id="sigBox" onclick="openSigModal()">
+            <img id="sigPreview" src="" alt="Signature">
+            <div class="sig-tap-hint">✏️ Tap to Sign</div>
+            <button class="sig-clear-btn" onclick="event.stopPropagation();clearSig()">✕ Clear</button>
+          </div>
         </div>
-        <div class="field">
+        <div class="fld" style="margin-bottom:8px">
           <label>Date</label>
-          <div class="sig-line"></div>
+          <input type="text" inputmode="text" placeholder="MM/DD/YYYY">
         </div>
-        <p style="font-size:10px; color:#999; margin-top:6px; line-height:1.5">
+        <p style="font-size:10px;color:#999;line-height:1.5">
           Customer confirms all items listed have been dropped off and applicable fees have been paid.
         </p>
       </div>
@@ -686,7 +510,7 @@
     <div class="staff-fields">
       <div class="staff-field">
         <label>Accepted By (Staff Name)</label>
-        <input type="text" placeholder="">
+        <input type="text" autocomplete="name">
       </div>
       <div class="staff-field">
         <label>Drop-Off Bay / Zone</label>
@@ -697,77 +521,22 @@
 
 </div><!-- /page -->
 
-<script>
-  function genFormNum() {
-    return '#' + (Math.floor(Math.random() * 900000) + 100000);
-  }
-
-  function stampDateTime() {
-    const now = new Date();
-    document.getElementById('todayDate').textContent =
-      now.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-    document.getElementById('todayTime').textContent =
-      now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
-  }
-
-  // Init
-  document.getElementById('formNum').textContent = genFormNum();
-  stampDateTime();
-
-  // Wire up existing row inputs
-  document.querySelectorAll('#itemsBody input[type="number"]').forEach(i => {
-    i.addEventListener('input', recalc);
-  });
-
-  function addRow() {
-    const tbody = document.getElementById('itemsBody');
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td><input type="text" placeholder=""></td>
-      <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
-      <td class="center"><input type="number" min="1" oninput="recalc()"></td>
-      <td><input type="text" placeholder=""></td>
-      <td class="center"><input type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
-    `;
-    tbody.appendChild(row);
-    recalc();
-  }
-
-  function recalc() {
-    const rows = document.querySelectorAll('#itemsBody tr');
-    let totalQty = 0, totalFee = 0;
-    rows.forEach(r => {
-      const inputs = r.querySelectorAll('input[type="number"]');
-      totalQty += parseFloat(inputs[0]?.value) || 0;
-      totalFee += parseFloat(inputs[1]?.value) || 0;
-    });
-    document.getElementById('totalQty').textContent = totalQty || 0;
-    document.getElementById('totalFee').textContent = '$' + totalFee.toFixed(2);
-  }
-
-  function newForm() {
-    if (!confirm('Clear this form and start a new one?')) return;
-    // Reset all text/tel inputs
-    document.querySelectorAll('input[type="text"], input[type="tel"]').forEach(i => i.value = '');
-    // Reset numbers
-    document.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
-    // Reset selects
-    document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-    // Reset textarea
-    document.querySelectorAll('textarea').forEach(t => t.value = '');
-    // Reset radio
-    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-    // Remove added rows (keep first 3)
-    const tbody = document.getElementById('itemsBody');
-    while (tbody.rows.length > 3) tbody.deleteRow(tbody.rows.length - 1);
-    // New form number + timestamp
-    document.getElementById('formNum').textContent = genFormNum();
-    stampDateTime();
-    recalc();
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-</script>
-
+<!-- FULLSCREEN SIGNATURE MODAL -->
+<div class="sig-modal" id="sigModal">
+  <div class="sig-modal-header">
+    <div class="sig-modal-title">✏️ Sign Here</div>
+    <span style="font-size:11px;color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;">Customer Acknowledgement</span>
+  </div>
+  <div class="sig-modal-wrap" id="sigModalWrap">
+    <canvas id="sigCanvas"></canvas>
+    <div class="sig-baseline"></div>
+    <div class="sig-x-mark">✕</div>
+  </div>
+  <div class="sig-modal-actions">
+    <button class="sig-modal-clear" onclick="sigModalClear()">Clear</button>
+    <button class="sig-modal-done" id="sigModalDone" onclick="sigModalDone()">✓ Done</button>
+  </div>
+</div>
 
 <!-- SAVE OVERLAY -->
 <div class="save-overlay" id="saveOverlay">
@@ -776,5 +545,226 @@
   <button class="save-overlay-close" onclick="document.getElementById('saveOverlay').classList.remove('open')">✕ Close</button>
 </div>
 
+<script>
+  /* ---- FORM NUMBER ---- */
+  function genFormNum() {
+    const n=new Date();
+    return '#'+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0')+n.getFullYear()+String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0');
+  }
+  function stampDateTime() {
+    const n=new Date();
+    document.getElementById('todayDate').textContent=n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    document.getElementById('todayTime').textContent=n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  }
+  document.getElementById('formNum').textContent = genFormNum();
+  stampDateTime();
+
+  /* ---- TABLE ---- */
+  function addRow() {
+    const tbody=document.getElementById('itemsBody');
+    const row=document.createElement('tr');
+    row.innerHTML=`
+      <td><input type="text"></td>
+      <td><select><option value="">—</option><option>Electronics</option><option>Metal</option><option>Cardboard</option><option>Glass</option><option>Plastic</option><option>Batteries</option><option>Tires</option><option>Appliances</option><option>Hazardous</option><option>Other</option></select></td>
+      <td class="c"><input type="number" inputmode="numeric" min="1" oninput="recalc()"></td>
+      <td><input type="text"></td>
+      <td class="c"><input type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" oninput="recalc()"></td>
+    `;
+    tbody.appendChild(row);
+    recalc();
+    row.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+
+  function recalc() {
+    let qty=0, fee=0;
+    document.querySelectorAll('#itemsBody tr').forEach(r=>{
+      const ins=r.querySelectorAll('input[type="number"]');
+      qty+=parseFloat(ins[0]?.value)||0;
+      fee+=parseFloat(ins[1]?.value)||0;
+    });
+    document.getElementById('totalQty').textContent=qty||0;
+    document.getElementById('totalFee').textContent='$'+fee.toFixed(2);
+  }
+
+  /* ---- LOCAL STORAGE AUTO-SAVE ---- */
+  function saveToStorage() {
+    const data={};
+    document.querySelectorAll('input:not([type="radio"]),textarea,select').forEach((el,i)=>{
+      data['f'+i]=el.value;
+    });
+    const r=document.querySelector('input[type="radio"]:checked');
+    if(r) data['radio_payment']=r.value;
+    localStorage.setItem('dropoff_form',JSON.stringify(data));
+  }
+
+  function loadFromStorage() {
+    const saved=localStorage.getItem('dropoff_form');
+    if(saved){
+      const data=JSON.parse(saved);
+      document.querySelectorAll('input:not([type="radio"]),textarea,select').forEach((el,i)=>{
+        if(data['f'+i]!==undefined) el.value=data['f'+i];
+      });
+      if(data['radio_payment']){
+        const r=document.querySelector('input[type="radio"][value="'+data['radio_payment']+'"]');
+        if(r) r.checked=true;
+      }
+    }
+    const sig=localStorage.getItem('dropoff_sig');
+    if(sig){
+      document.getElementById('sigPreview').src=sig;
+      document.getElementById('sigBox').classList.add('has-sig');
+    }
+    recalc();
+  }
+
+  document.addEventListener('input', saveToStorage);
+  document.addEventListener('change', saveToStorage);
+  window.addEventListener('load', loadFromStorage);
+
+  /* ---- NEW FORM ---- */
+  function newForm() {
+    if(!confirm('Clear this form and start a new one?')) return;
+    document.querySelectorAll('input:not([type="radio"]),textarea').forEach(i=>i.value='');
+    document.querySelectorAll('select').forEach(s=>s.selectedIndex=0);
+    document.querySelectorAll('input[type="radio"]').forEach(r=>r.checked=false);
+    const tbody=document.getElementById('itemsBody');
+    while(tbody.rows.length>3) tbody.deleteRow(tbody.rows.length-1);
+    document.getElementById('formNum').textContent=genFormNum();
+    stampDateTime(); recalc();
+    clearSig();
+    localStorage.removeItem('dropoff_form');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  /* ---- SIGNATURE MODAL ---- */
+  let _sc=null, _sx=null, _sd=false, _hasMark=false;
+
+  function _initCanvas() {
+    if(!_sc){
+      _sc=document.getElementById('sigCanvas');
+      _sx=_sc.getContext('2d');
+    }
+  }
+
+  function openSigModal() {
+    _initCanvas();
+    _hasMark=false;
+    document.getElementById('sigModalDone').classList.remove('ready');
+    document.getElementById('sigModal').classList.add('open');
+    requestAnimationFrame(()=>{
+      const wrap=document.getElementById('sigModalWrap');
+      const r=wrap.getBoundingClientRect();
+      _sc.width=r.width||300; _sc.height=r.height||300;
+      _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2.5; _sx.lineCap='round'; _sx.lineJoin='round';
+    });
+  }
+
+  function sigModalClear() {
+    if(!_sx) return;
+    _sx.clearRect(0,0,_sc.width,_sc.height);
+    _hasMark=false; document.getElementById('sigModalDone').classList.remove('ready');
+  }
+
+  function cropSig(src) {
+    const ctx=src.getContext('2d'), w=src.width, h=src.height;
+    const d=ctx.getImageData(0,0,w,h).data;
+    let minX=w,minY=h,maxX=0,maxY=0,found=false;
+    for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+      if(d[(y*w+x)*4+3]>20){
+        if(x<minX)minX=x; if(x>maxX)maxX=x;
+        if(y<minY)minY=y; if(y>maxY)maxY=y; found=true;
+      }
+    }
+    if(!found) return src.toDataURL('image/png');
+    const pad=12;
+    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+    maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
+    const cw=maxX-minX, ch=maxY-minY;
+    const out=document.createElement('canvas');
+    out.width=cw; out.height=ch;
+    out.getContext('2d').drawImage(src,minX,minY,cw,ch,0,0,cw,ch);
+    return out.toDataURL('image/png');
+  }
+
+  function sigModalDone() {
+    if(!_hasMark) return;
+    const dataURL=cropSig(_sc);
+    document.getElementById('sigPreview').src=dataURL;
+    document.getElementById('sigBox').classList.add('has-sig');
+    localStorage.setItem('dropoff_sig',dataURL);
+    document.getElementById('sigModal').classList.remove('open');
+  }
+
+  function clearSig() {
+    document.getElementById('sigPreview').src='';
+    document.getElementById('sigBox').classList.remove('has-sig');
+    localStorage.removeItem('dropoff_sig');
+    if(_sx) _sx.clearRect(0,0,_sc.width,_sc.height);
+    _hasMark=false;
+  }
+
+  function _sigPos(e) {
+    const r=_sc.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
+    return {x:(s.clientX-r.left)*(_sc.width/r.width),y:(s.clientY-r.top)*(_sc.height/r.height)};
+  }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const c=document.getElementById('sigCanvas');
+    if(!c) return;
+    c.addEventListener('mousedown', e=>{_initCanvas();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);});
+    c.addEventListener('mousemove', e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');});
+    c.addEventListener('mouseup',   ()=>_sd=false);
+    c.addEventListener('mouseleave',()=>_sd=false);
+    c.addEventListener('touchstart',e=>{e.preventDefault();_initCanvas();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);},{passive:false});
+    c.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');},{passive:false});
+    c.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
+  });
+
+  /* ---- SAVE AS IMAGE ---- */
+  async function saveAsImage() {
+    const btn=document.getElementById('saveImgBtn');
+    const orig=btn.textContent;
+    btn.textContent='⏳'; btn.disabled=true;
+    try {
+      const page=document.querySelector('.page');
+      const styleTag=document.createElement('style');
+      styleTag.id='save-override';
+      styleTag.textContent=`
+        .fg-2{grid-template-columns:1fr 1fr!important}
+        .fg-sp{grid-template-columns:1fr 1.4fr!important}
+        .fg-bot{grid-template-columns:1fr 1fr!important}
+        .pay-details{grid-template-columns:1fr 1fr!important}
+        .staff-fields{flex-direction:row!important;gap:14px!important}
+        .full{grid-column:1/-1!important}
+        .table-wrap{overflow:visible!important}
+        .items-table{min-width:auto!important}
+        .header{flex-direction:row!important;align-items:center!important}
+        .header-right{align-self:auto!important}
+      `;
+      document.head.appendChild(styleTag);
+      const origW=page.style.width, origMax=page.style.maxWidth;
+      page.style.width='900px'; page.style.maxWidth='900px';
+      await new Promise(r=>setTimeout(r,250));
+      const canvas=await html2canvas(page,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollY:0,windowWidth:920,windowHeight:page.scrollHeight});
+      page.style.width=origW; page.style.maxWidth=origMax;
+      document.getElementById('save-override').remove();
+      const img=document.getElementById('saveOverlayImg');
+      img.src=canvas.toDataURL('image/png');
+      document.getElementById('saveOverlay').classList.add('open');
+    } catch(e){ alert('Could not save: '+e.message); }
+    btn.textContent=orig; btn.disabled=false;
+  }
+
+  /* ---- SERVICE WORKER ---- */
+  if('serviceWorker' in navigator){
+    const sw=`
+      const CACHE='dropoff-v1';
+      self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll([self.location.pathname])));self.skipWaiting();});
+      self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});
+      self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});
+    `;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+  }
+</script>
 </body>
 </html>
