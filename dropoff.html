@@ -649,6 +649,7 @@
     }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -832,7 +833,7 @@
         </div>
         <div class="field" style="margin-bottom:10px">
           <label>Date</label>
-          <input type="text" id="sigDate" placeholder="MM/DD/YYYY" inputmode="numeric">
+          <input type="text" id="sigDate" placeholder="MM/DD/YYYY" inputmode="text">
         </div>
         <p style="font-size:10px; color:#999; margin-top:6px; line-height:1.5">
           Customer confirms all items listed have been dropped off and applicable fees have been paid.
@@ -933,9 +934,14 @@
   }
 
   /* ===================== SIGNATURE PAD (fullscreen modal) ===================== */
-  const _sc  = document.getElementById('sigCanvas');
-  const _sx  = _sc.getContext('2d');
+  let _sc = null, _sx = null;
   let _sd = false, _hasMark = false;
+  function _initSigCanvas() {
+    if (!_sc) {
+      _sc = document.getElementById('sigCanvas');
+      _sx = _sc.getContext('2d');
+    }
+  }
 
   function _initCanvas() {
     const wrap = document.getElementById('sigModalWrap');
@@ -946,13 +952,20 @@
   }
 
   function openSigModal() {
+    _initSigCanvas();
     document.getElementById('sigModal').classList.add('open');
     _hasMark = false;
     document.getElementById('sigModalDone').classList.remove('ready');
-    requestAnimationFrame(() => { _initCanvas(); });
+    requestAnimationFrame(() => {
+      const wrap = document.getElementById('sigModalWrap');
+      const r = wrap.getBoundingClientRect();
+      _sc.width = r.width || 300; _sc.height = r.height || 300;
+      _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2.5; _sx.lineCap='round'; _sx.lineJoin='round';
+    });
   }
 
   function sigModalClear() {
+    if (!_sx) return;
     _sx.clearRect(0,0,_sc.width,_sc.height);
     _hasMark = false;
     document.getElementById('sigModalDone').classList.remove('ready');
@@ -977,7 +990,7 @@
     document.getElementById('sigPreview').src = '';
     document.getElementById('sigBox').classList.remove('sig-has-data');
     localStorage.removeItem('dropoff_sig');
-    _sx.clearRect(0,0,_sc.width,_sc.height);
+    if (_sx) _sx.clearRect(0,0,_sc.width,_sc.height);
     _hasMark = false;
   }
 
@@ -985,13 +998,18 @@
     const r=_sc.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
     return {x:(s.clientX-r.left)*(_sc.width/r.width), y:(s.clientY-r.top)*(_sc.height/r.height)};
   }
-  _sc.addEventListener('mousedown',  e=>{_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);});
-  _sc.addEventListener('mousemove',  e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');});
-  _sc.addEventListener('mouseup',    ()=>_sd=false);
-  _sc.addEventListener('mouseleave', ()=>_sd=false);
-  _sc.addEventListener('touchstart',e=>{e.preventDefault();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);},{passive:false});
-  _sc.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');},{passive:false});
-  _sc.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
+  // Event listeners attached after DOM ready so canvas exists
+  document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('sigCanvas');
+    if (!canvas) return;
+    canvas.addEventListener('mousedown',  e=>{_initSigCanvas();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);});
+    canvas.addEventListener('mousemove',  e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');});
+    canvas.addEventListener('mouseup',    ()=>_sd=false);
+    canvas.addEventListener('mouseleave', ()=>_sd=false);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();_initSigCanvas();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);},{passive:false});
+    canvas.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');},{passive:false});
+    canvas.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
+  });
 
   /* ===================== LOCAL STORAGE AUTO-SAVE ===================== */
   function saveToStorage() {

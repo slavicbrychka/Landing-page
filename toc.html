@@ -164,14 +164,14 @@
     font-size:9px; font-weight:700; letter-spacing:1.5px;
     text-transform:uppercase; color:var(--mid);
   }
-  .fld input, .fld select, .fld textarea {
+  .fld input:not([type="checkbox"]), .fld select, .fld textarea {
     border:none; border-bottom:1px solid transparent;
     font-size:15px; font-family:'Barlow',sans-serif;
     color:var(--ink); background:transparent; outline:none;
     width:100%; -webkit-appearance:none; appearance:none;
     min-height:36px; padding:2px 0; transition:border-color .15s;
   }
-  .fld input:focus, .fld select:focus, .fld textarea:focus {
+  .fld input:not([type="checkbox"]):focus, .fld select:focus, .fld textarea:focus {
     border-bottom-color:var(--blue); background:var(--blue-pale);
     padding:2px 4px;
   }
@@ -183,8 +183,9 @@
   .checkbox-row { display:flex; align-items:center; gap:16px; padding-top:6px; }
   .cb-opt { display:flex; align-items:center; gap:6px; cursor:pointer; }
   .cb-opt input[type="checkbox"] {
-    width:18px; height:18px; min-height:18px; cursor:pointer;
+    width:20px; height:20px; min-height:20px; cursor:pointer;
     accent-color:var(--blue); flex-shrink:0;
+    -webkit-appearance:checkbox; appearance:checkbox;
   }
   .cb-opt span { font-size:14px; font-family:'Barlow',sans-serif; color:var(--ink); }
 
@@ -341,6 +342,7 @@
     }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -348,6 +350,7 @@
 <div class="toolbar">
   <span class="toolbar-label">Precision E-Cycle — Transfer of Custody</span>
   <button class="btn btn-new" onclick="newForm()">↺ New</button>
+  <button class="btn btn-save" onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
   <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
 </div>
 
@@ -366,7 +369,7 @@
     </div>
     <div class="meta-item">
       <span class="meta-label">Date:</span>
-      <input type="text" id="formDate" placeholder="MM / DD / YYYY" inputmode="numeric">
+      <input type="text" id="formDate" placeholder="MM / DD / YYYY" inputmode="text">
     </div>
   </div>
   <div class="field-grid fg-2" style="border-bottom:2px solid var(--border)">
