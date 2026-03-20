@@ -657,29 +657,51 @@
   .btn-save { background:#f5c518; color:#1a1a1a; }
 
   @media print {
-    @page { size: letter portrait; margin: 0.5in; }
+    @page { size: letter portrait; margin: 0; }
 
-    body { background: white; padding: 0; display: block; }
+    html, body { margin: 0; padding: 0; background: white; }
+    body { display: block; }
     .toolbar, .install-banner, .ios-install-hint, .scroll-hint, .sig-modal, .save-overlay { display: none !important; }
 
-    .page { box-shadow: none; border: 1.5px solid #000; max-width: 100%; width: 100%; }
-    .add-row-btn { display: none !important; }
+    /* Scale entire form to fit one page */
+    .page {
+      box-shadow: none !important;
+      border: 1.5px solid #000 !important;
+      position: absolute !important;
+      top: 0 !important; left: 0 !important;
+      width: 130% !important;
+      max-width: 130% !important;
+      transform-origin: top left !important;
+      transform: scale(0.77) !important;
+    }
 
+    .add-row-btn { display: none !important; }
     .table-scroll-wrapper { overflow: visible; border: none; }
     .items-table { min-width: auto; }
+
+    /* Tighter field heights for print */
+    input, select, textarea {
+      border: 1px solid #bbb !important;
+      background: white !important;
+      font-size: 11px !important;
+      min-height: 20px !important;
+      padding: 2px 6px !important;
+    }
+    .fld, .field { gap: 2px !important; }
+    .section { margin-bottom: 8px !important; }
+    .body { padding: 10px 14px 6px !important; }
+    .bottom-row { margin-bottom: 8px !important; }
+    .summary-payment-row { margin-bottom: 8px !important; }
+    textarea { min-height: 40px !important; }
+
+    /* Sig preview prints correctly */
+    #sigPreview { display: block !important; }
+    #sigBox { height: 50px !important; }
 
     .header, .date-strip, .staff-footer, .totals-box, .items-table th, .pay-option label {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-
-    input, select, textarea {
-      border: 1px solid #bbb !important;
-      background: white !important;
-      font-size: 12px !important;
-    }
-
-    #sigCanvas { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
     .staff-field input {
       background: rgba(0,0,0,0.06) !important;
@@ -1124,29 +1146,28 @@
     btn.textContent = '⏳…'; btn.disabled = true;
     try {
       const el = document.querySelector('.page');
+      // allowTaint:true + useCORS:true handles base64 images and external fonts
       const canvas = await html2canvas(el, {
-        scale:2, useCORS:true, backgroundColor:'#ffffff',
-        logging:false, scrollY:-window.scrollY,
-        windowWidth:el.scrollWidth, windowHeight:el.scrollHeight
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        scrollY: -window.scrollY,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight,
+        imageTimeout: 0,
+        onclone: (doc) => {
+          // Make sure sig preview is visible in clone
+          const preview = doc.getElementById('sigPreview');
+          if (preview) preview.style.display = 'block';
+        }
       });
-      // Show in overlay — works in PWA, no window.open needed
       const img = document.getElementById('saveOverlayImg');
       img.src = canvas.toDataURL('image/png');
       document.getElementById('saveOverlay').classList.add('open');
     } catch(e) {
-      // Fallback: try direct download link
-      try {
-        const el = document.querySelector('.page');
-        const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff', logging:false});
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = 'dropoff-form.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } catch(e2) {
-        alert('Save failed. Try taking a screenshot instead.');
-      }
+      alert('Could not generate image: ' + e.message + '\nTry taking a screenshot instead.');
     }
     btn.textContent = origText; btn.disabled = false;
   }
