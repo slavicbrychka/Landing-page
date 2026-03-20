@@ -826,7 +826,7 @@
         <div class="field" style="margin-bottom:10px">
           <label>Customer Signature</label>
           <div id="sigBox" style="border:1.5px solid var(--border);background:#fff;position:relative;height:80px;cursor:pointer;" onclick="openSigModal()">
-            <img id="sigPreview" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;">
+            <img id="sigPreview" style="position:absolute;inset:0;width:100%;height:100%;display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:calc(100% - 8px);width:auto;max-width:calc(100% - 8px);">
             <div class="sig-tap-hint">✏️ Tap to Sign</div>
             <button onclick="event.stopPropagation();clearSig()" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:11px;color:#aaa;cursor:pointer;padding:2px 6px;font-family:'Barlow',sans-serif;z-index:2;">✕ Clear</button>
           </div>
@@ -971,9 +971,38 @@
     document.getElementById('sigModalDone').classList.remove('ready');
   }
 
+
+  /* ---- CROP SIGNATURE TO CONTENT ---- */
+  function cropSigCanvas(srcCanvas) {
+    const ctx = srcCanvas.getContext('2d');
+    const w = srcCanvas.width, h = srcCanvas.height;
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let minX=w, minY=h, maxX=0, maxY=0, found=false;
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        const a = data[(y*w+x)*4+3];
+        if (a > 20) {
+          if (x<minX) minX=x; if (x>maxX) maxX=x;
+          if (y<minY) minY=y; if (y>maxY) maxY=y;
+          found=true;
+        }
+      }
+    }
+    if (!found) return srcCanvas.toDataURL('image/png');
+    // Add padding
+    const pad = 12;
+    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+    maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
+    const cw=maxX-minX, ch=maxY-minY;
+    const out = document.createElement('canvas');
+    out.width=cw; out.height=ch;
+    out.getContext('2d').drawImage(srcCanvas, minX,minY,cw,ch, 0,0,cw,ch);
+    return out.toDataURL('image/png');
+  }
+
   function sigModalDone() {
     if (!_hasMark) return;
-    const dataURL = _sc.toDataURL('image/png');
+    const dataURL = cropSigCanvas(_sc);
     // Show in preview box
     const preview = document.getElementById('sigPreview');
     preview.src = dataURL;

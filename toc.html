@@ -451,7 +451,7 @@
       </div>
       <div class="sig-label">Signature</div>
       <div id="sigBox1" class="sig-canvas-wrap" style="cursor:pointer;" onclick="openSigModal(1)">
-        <img id="sigPreview1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;">
+        <img id="sigPreview1" style="position:absolute;inset:0;width:100%;height:100%;display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:calc(100% - 8px);width:auto;max-width:calc(100% - 8px);">
         <div class="sig-tap-hint">✏️ Tap to Sign</div>
         <button class="sig-clear" onclick="event.stopPropagation();clearSigBox(1)">✕ Clear</button>
       </div>
@@ -465,7 +465,7 @@
       </div>
       <div class="sig-label">Signature</div>
       <div id="sigBox2" class="sig-canvas-wrap" style="cursor:pointer;" onclick="openSigModal(2)">
-        <img id="sigPreview2" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;">
+        <img id="sigPreview2" style="position:absolute;inset:0;width:100%;height:100%;display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:calc(100% - 8px);width:auto;max-width:calc(100% - 8px);">
         <div class="sig-tap-hint">✏️ Tap to Sign</div>
         <button class="sig-clear" onclick="event.stopPropagation();clearSigBox(2)" style="z-index:2;">✕ Clear</button>
       </div>
@@ -536,9 +536,37 @@
     document.getElementById('sigModalDone').classList.remove('ready');
   }
 
+
+  /* ---- CROP SIGNATURE TO CONTENT ---- */
+  function cropSigCanvas(srcCanvas) {
+    const ctx = srcCanvas.getContext('2d');
+    const w = srcCanvas.width, h = srcCanvas.height;
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let minX=w, minY=h, maxX=0, maxY=0, found=false;
+    for (let y=0; y<h; y++) {
+      for (let x=0; x<w; x++) {
+        const a = data[(y*w+x)*4+3];
+        if (a > 20) {
+          if (x<minX) minX=x; if (x>maxX) maxX=x;
+          if (y<minY) minY=y; if (y>maxY) maxY=y;
+          found=true;
+        }
+      }
+    }
+    if (!found) return srcCanvas.toDataURL('image/png');
+    const pad = 12;
+    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+    maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
+    const cw=maxX-minX, ch=maxY-minY;
+    const out = document.createElement('canvas');
+    out.width=cw; out.height=ch;
+    out.getContext('2d').drawImage(srcCanvas, minX,minY,cw,ch, 0,0,cw,ch);
+    return out.toDataURL('image/png');
+  }
+
   function sigModalDone() {
     if (!_hasMark) return;
-    const dataURL = _sc.toDataURL('image/png');
+    const dataURL = cropSigCanvas(_sc);
     const preview = document.getElementById('sigPreview' + _activeSig);
     preview.src = dataURL;
     preview.style.display = 'block';
