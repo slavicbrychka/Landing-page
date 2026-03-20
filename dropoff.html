@@ -648,16 +648,7 @@
       border: 1px solid rgba(255,255,255,0.3) !important;
     }
   }
-  .btn-save { background: #f5c518; color: #1a1a1a; }
-  .save-toast {
-    display:none; position:fixed; bottom:calc(20px + var(--safe-bottom)); left:50%;
-    transform:translateX(-50%); background:#1a1a1a; color:#fff;
-    padding:10px 20px; border-radius:4px; font-family:'Barlow Condensed',sans-serif;
-    font-size:13px; letter-spacing:1px; z-index:999; white-space:nowrap;
-  }
-  .save-toast.show { display:block; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -668,7 +659,6 @@
   <button class="btn btn-save" onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
   <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
 </div>
-<div class="save-toast" id="saveToast">Long-press image to save to Photos 📸</div>
 
 <!-- INSTALL BANNER (Android / non-iOS PWA) -->
 <div class="install-banner" id="installBanner">
@@ -834,9 +824,10 @@
         <div class="section-title">Customer Acknowledgement</div>
         <div class="field" style="margin-bottom:10px">
           <label>Customer Signature</label>
-          <div style="border:1.5px solid var(--border); background:#fff; position:relative; height:80px;">
-            <canvas id="sigCanvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;"></canvas>
-            <button onclick="clearSig()" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:11px;color:#aaa;cursor:pointer;padding:2px 6px;font-family:'Barlow',sans-serif;">✕ Clear</button>
+          <div id="sigBox" style="border:1.5px solid var(--border);background:#fff;position:relative;height:80px;cursor:pointer;" onclick="openSigModal()">
+            <img id="sigPreview" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none;">
+            <div class="sig-tap-hint">✏️ Tap to Sign</div>
+            <button onclick="event.stopPropagation();clearSig()" style="position:absolute;top:4px;right:4px;background:none;border:none;font-size:11px;color:#aaa;cursor:pointer;padding:2px 6px;font-family:'Barlow',sans-serif;z-index:2;">✕ Clear</button>
           </div>
         </div>
         <div class="field" style="margin-bottom:10px">
@@ -941,91 +932,125 @@
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
-  /* ===================== SIGNATURE PAD ===================== */
-  const _sc = document.getElementById('sigCanvas');
-  const _sx = _sc.getContext('2d');
-  let _sd = false;
-  function _sigResize() {
-    const r = _sc.getBoundingClientRect();
-    const img = _sc.width > 0 ? _sx.getImageData(0,0,_sc.width,_sc.height) : null;
-    _sc.width = r.width; _sc.height = r.height;
-    if(img) _sx.putImageData(img,0,0);
-    _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2; _sx.lineCap='round'; _sx.lineJoin='round';
+  /* ===================== SIGNATURE PAD (fullscreen modal) ===================== */
+  const _sc  = document.getElementById('sigCanvas');
+  const _sx  = _sc.getContext('2d');
+  let _sd = false, _hasMark = false;
+
+  function _initCanvas() {
+    const wrap = document.getElementById('sigModalWrap');
+    const r = wrap.getBoundingClientRect();
+    _sc.width = r.width || 300;
+    _sc.height = r.height || 300;
+    _sx.strokeStyle='#1a1a1a'; _sx.lineWidth=2.5; _sx.lineCap='round'; _sx.lineJoin='round';
   }
-  window.addEventListener('resize', _sigResize);
-  setTimeout(_sigResize, 100);
+
+  function openSigModal() {
+    document.getElementById('sigModal').classList.add('open');
+    _hasMark = false;
+    document.getElementById('sigModalDone').classList.remove('ready');
+    requestAnimationFrame(() => { _initCanvas(); });
+  }
+
+  function sigModalClear() {
+    _sx.clearRect(0,0,_sc.width,_sc.height);
+    _hasMark = false;
+    document.getElementById('sigModalDone').classList.remove('ready');
+  }
+
+  function sigModalDone() {
+    if (!_hasMark) return;
+    const dataURL = _sc.toDataURL('image/png');
+    // Show in preview box
+    const preview = document.getElementById('sigPreview');
+    preview.src = dataURL;
+    preview.style.display = 'block';
+    document.getElementById('sigBox').classList.add('sig-has-data');
+    // Save to localStorage
+    localStorage.setItem('dropoff_sig', dataURL);
+    // Close modal
+    document.getElementById('sigModal').classList.remove('open');
+  }
+
+  function clearSig() {
+    document.getElementById('sigPreview').style.display = 'none';
+    document.getElementById('sigPreview').src = '';
+    document.getElementById('sigBox').classList.remove('sig-has-data');
+    localStorage.removeItem('dropoff_sig');
+    _sx.clearRect(0,0,_sc.width,_sc.height);
+    _hasMark = false;
+  }
+
   function _sigPos(e) {
     const r=_sc.getBoundingClientRect(), s=e.touches?e.touches[0]:e;
     return {x:(s.clientX-r.left)*(_sc.width/r.width), y:(s.clientY-r.top)*(_sc.height/r.height)};
   }
   _sc.addEventListener('mousedown',  e=>{_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);});
-  _sc.addEventListener('mousemove',  e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();});
+  _sc.addEventListener('mousemove',  e=>{if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');});
   _sc.addEventListener('mouseup',    ()=>_sd=false);
   _sc.addEventListener('mouseleave', ()=>_sd=false);
   _sc.addEventListener('touchstart',e=>{e.preventDefault();_sd=true;const p=_sigPos(e);_sx.beginPath();_sx.moveTo(p.x,p.y);},{passive:false});
-  _sc.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();},{passive:false});
+  _sc.addEventListener('touchmove', e=>{e.preventDefault();if(!_sd)return;const p=_sigPos(e);_sx.lineTo(p.x,p.y);_sx.stroke();_hasMark=true;document.getElementById('sigModalDone').classList.add('ready');},{passive:false});
   _sc.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
-  function clearSig(){_sx.clearRect(0,0,_sc.width,_sc.height);}
 
   /* ===================== LOCAL STORAGE AUTO-SAVE ===================== */
   function saveToStorage() {
     const data = {};
-    document.querySelectorAll('input[type="text"], input[type="tel"], input[type="number"], textarea, select').forEach((el, i) => {
-      data['field_' + i] = el.value;
+    document.querySelectorAll('input[type="text"],input[type="tel"],input[type="number"],textarea,select').forEach((el,i) => {
+      data['f'+i] = el.value;
     });
-    const radios = document.querySelectorAll('input[type="radio"]:checked');
-    radios.forEach(r => { data['radio_' + r.name] = r.value; });
+    const r = document.querySelector('input[type="radio"]:checked');
+    if (r) data['radio_payment'] = r.value;
     localStorage.setItem('dropoff_form', JSON.stringify(data));
   }
 
   function loadFromStorage() {
+    // Load fields
     const saved = localStorage.getItem('dropoff_form');
-    if (!saved) return;
-    const data = JSON.parse(saved);
-    document.querySelectorAll('input[type="text"], input[type="tel"], input[type="number"], textarea, select').forEach((el, i) => {
-      if (data['field_' + i] !== undefined) el.value = data['field_' + i];
-    });
-    Object.keys(data).forEach(k => {
-      if (k.startsWith('radio_')) {
-        const name = k.replace('radio_', '');
-        const radio = document.querySelector('input[type="radio"][name="' + name + '"][value="' + data[k] + '"]');
-        if (radio) radio.checked = true;
+    if (saved) {
+      const data = JSON.parse(saved);
+      document.querySelectorAll('input[type="text"],input[type="tel"],input[type="number"],textarea,select').forEach((el,i) => {
+        if (data['f'+i] !== undefined) el.value = data['f'+i];
+      });
+      if (data['radio_payment']) {
+        const r = document.querySelector('input[type="radio"][value="'+data['radio_payment']+'"]');
+        if (r) r.checked = true;
       }
-    });
+    }
+    // Load signature
+    const sig = localStorage.getItem('dropoff_sig');
+    if (sig) {
+      const preview = document.getElementById('sigPreview');
+      preview.src = sig;
+      preview.style.display = 'block';
+      document.getElementById('sigBox').classList.add('sig-has-data');
+    }
+    recalc();
   }
 
-  // Auto-save on any input change
   document.addEventListener('input', saveToStorage);
   document.addEventListener('change', saveToStorage);
-
-  // Load saved data on page load
-  window.addEventListener('load', () => { loadFromStorage(); recalc(); });
+  window.addEventListener('load', loadFromStorage);
 
   /* ===================== SAVE AS IMAGE ===================== */
   async function saveAsImage() {
     const btn = document.getElementById('saveImgBtn');
-    btn.textContent = '⏳…';
-    btn.disabled = true;
+    const origText = btn.textContent;
+    btn.textContent = '⏳…'; btn.disabled = true;
     try {
       const el = document.querySelector('.page');
       const canvas = await html2canvas(el, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff',
-        logging: false, scrollY: -window.scrollY,
-        windowWidth: el.scrollWidth, windowHeight: el.scrollHeight
+        scale:2, useCORS:true, backgroundColor:'#ffffff',
+        logging:false, scrollY:-window.scrollY,
+        windowWidth:el.scrollWidth, windowHeight:el.scrollHeight
       });
-      // Open in new tab — on iPhone long-press to Save to Photos
-      const win = window.open();
-      win.document.write('<img src="' + canvas.toDataURL('image/png') + '" style="max-width:100%">');
-      win.document.title = 'Drop-Off Form — Long-press to Save';
-      // Show toast
-      const toast = document.getElementById('saveToast');
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 4000);
+      const img = document.getElementById('saveOverlayImg');
+      img.src = canvas.toDataURL('image/png');
+      document.getElementById('saveOverlay').classList.add('open');
     } catch(e) {
       alert('Could not save: ' + e.message);
     }
-    btn.textContent = '💾 Save';
-    btn.disabled = false;
+    btn.textContent = origText; btn.disabled = false;
   }
 
   /* ===================== PWA INSTALL ===================== */
@@ -1089,6 +1114,31 @@
     navigator.serviceWorker.register(swURL).catch(() => {});
   }
 </script>
+
+
+<!-- FULLSCREEN SIGNATURE MODAL -->
+<div class="sig-modal" id="sigModal">
+  <div class="sig-modal-header">
+    <div class="sig-modal-title">✏️ Sign Here</div>
+    <span style="font-size:11px;color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;">Customer Acknowledgement</span>
+  </div>
+  <div class="sig-modal-canvas-wrap" id="sigModalWrap">
+    <canvas id="sigCanvas"></canvas>
+    <div class="sig-modal-baseline"></div>
+    <div class="sig-modal-x">✕</div>
+  </div>
+  <div class="sig-modal-actions">
+    <button class="sig-modal-clear" onclick="sigModalClear()">Clear</button>
+    <button class="sig-modal-done" id="sigModalDone" onclick="sigModalDone()">✓ Done</button>
+  </div>
+</div>
+
+<!-- SAVE IMAGE OVERLAY -->
+<div class="save-overlay" id="saveOverlay">
+  <div class="save-overlay-msg">📱 <strong>iPhone:</strong> Long-press the image below → Save to Photos<br><span style="opacity:.6;font-size:12px;">Or screenshot this screen</span></div>
+  <img id="saveOverlayImg" src="" alt="Form snapshot">
+  <button class="save-overlay-close" onclick="document.getElementById('saveOverlay').classList.remove('open')">✕ Close</button>
+</div>
 
 </body>
 </html>
