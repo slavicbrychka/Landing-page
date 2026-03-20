@@ -648,8 +648,14 @@
       border: 1px solid rgba(255,255,255,0.3) !important;
     }
   }
-  /* ---- SAVE BUTTON ---- */
   .btn-save { background: #f5c518; color: #1a1a1a; }
+  .save-toast {
+    display:none; position:fixed; bottom:calc(20px + var(--safe-bottom)); left:50%;
+    transform:translateX(-50%); background:#1a1a1a; color:#fff;
+    padding:10px 20px; border-radius:4px; font-family:'Barlow Condensed',sans-serif;
+    font-size:13px; letter-spacing:1px; z-index:999; white-space:nowrap;
+  }
+  .save-toast.show { display:block; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -662,6 +668,7 @@
   <button class="btn btn-save" onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
   <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
 </div>
+<div class="save-toast" id="saveToast">Long-press image to save to Photos 📸</div>
 
 <!-- INSTALL BANNER (Android / non-iOS PWA) -->
 <div class="install-banner" id="installBanner">
@@ -930,6 +937,7 @@
     clearSig();
     stampDateTime();
     recalc();
+    localStorage.removeItem('dropoff_form');
     window.scrollTo({top: 0, behavior: 'smooth'});
   }
 
@@ -959,24 +967,62 @@
   _sc.addEventListener('touchend',  e=>{e.preventDefault();_sd=false;},{passive:false});
   function clearSig(){_sx.clearRect(0,0,_sc.width,_sc.height);}
 
+  /* ===================== LOCAL STORAGE AUTO-SAVE ===================== */
+  function saveToStorage() {
+    const data = {};
+    document.querySelectorAll('input[type="text"], input[type="tel"], input[type="number"], textarea, select').forEach((el, i) => {
+      data['field_' + i] = el.value;
+    });
+    const radios = document.querySelectorAll('input[type="radio"]:checked');
+    radios.forEach(r => { data['radio_' + r.name] = r.value; });
+    localStorage.setItem('dropoff_form', JSON.stringify(data));
+  }
+
+  function loadFromStorage() {
+    const saved = localStorage.getItem('dropoff_form');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    document.querySelectorAll('input[type="text"], input[type="tel"], input[type="number"], textarea, select').forEach((el, i) => {
+      if (data['field_' + i] !== undefined) el.value = data['field_' + i];
+    });
+    Object.keys(data).forEach(k => {
+      if (k.startsWith('radio_')) {
+        const name = k.replace('radio_', '');
+        const radio = document.querySelector('input[type="radio"][name="' + name + '"][value="' + data[k] + '"]');
+        if (radio) radio.checked = true;
+      }
+    });
+  }
+
+  // Auto-save on any input change
+  document.addEventListener('input', saveToStorage);
+  document.addEventListener('change', saveToStorage);
+
+  // Load saved data on page load
+  window.addEventListener('load', () => { loadFromStorage(); recalc(); });
+
   /* ===================== SAVE AS IMAGE ===================== */
   async function saveAsImage() {
     const btn = document.getElementById('saveImgBtn');
-    btn.textContent = '⏳ Saving…';
+    btn.textContent = '⏳…';
     btn.disabled = true;
     try {
-      const canvas = await html2canvas(document.getElementById('mainForm') || document.querySelector('.page'), {
+      const el = document.querySelector('.page');
+      const canvas = await html2canvas(el, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff',
-        logging: false
+        logging: false, scrollY: -window.scrollY,
+        windowWidth: el.scrollWidth, windowHeight: el.scrollHeight
       });
-      const link = document.createElement('a');
-      const now = new Date();
-      const ts = String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + now.getFullYear();
-      link.download = 'dropoff-' + ts + '.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      // Open in new tab — on iPhone long-press to Save to Photos
+      const win = window.open();
+      win.document.write('<img src="' + canvas.toDataURL('image/png') + '" style="max-width:100%">');
+      win.document.title = 'Drop-Off Form — Long-press to Save';
+      // Show toast
+      const toast = document.getElementById('saveToast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
     } catch(e) {
-      alert('Could not save image: ' + e.message);
+      alert('Could not save: ' + e.message);
     }
     btn.textContent = '💾 Save';
     btn.disabled = false;

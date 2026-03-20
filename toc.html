@@ -249,6 +249,13 @@
 
   /* ---- PRINT ---- */
   .btn-save { background: #f5c518; color: #1a1a1a; }
+  .save-toast {
+    display:none; position:fixed; bottom:calc(20px + var(--safe-bottom)); left:50%;
+    transform:translateX(-50%); background:#1a1a1a; color:#fff;
+    padding:10px 20px; border-radius:4px; font-family:'Barlow Condensed',sans-serif;
+    font-size:13px; letter-spacing:1px; z-index:999; white-space:nowrap;
+  }
+  .save-toast.show { display:block; }
 
   @media print {
     @page { size: letter portrait; margin: 0.45in; }
@@ -321,6 +328,7 @@
   <button class="btn btn-save" onclick="saveAsImage()" id="saveImgBtn">💾 Save</button>
   <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
 </div>
+<div class="save-toast" id="saveToast">Long-press image to save to Photos 📸</div>
 
 <div class="page">
 
@@ -518,26 +526,91 @@
       else i.value = '';
     });
     clearSig(1); clearSig(2);
+    localStorage.removeItem('toc_form');
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
-  /* ---- SAVE AS IMAGE ---- */
+  /* ---- LOCAL STORAGE AUTO-SAVE ---- */
+  function saveToStorage() {
+    const data = {};
+    document.querySelectorAll('input:not([readonly]), textarea').forEach((el, i) => {
+      if (el.type === 'checkbox') data['cb_' + (el.id||i)] = el.checked;
+      else data['field_' + i] = el.value;
+    });
+    localStorage.setItem('toc_form', JSON.stringify(data));
+  }
+
+  function loadFromStorage() {
+    const saved = localStorage.getItem('toc_form');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    document.querySelectorAll('input:not([readonly]), textarea').forEach((el, i) => {
+      if (el.type === 'checkbox') {
+        const v = data['cb_' + (el.id||i)];
+        if (v !== undefined) el.checked = v;
+      } else {
+        if (data['field_' + i] !== undefined) el.value = data['field_' + i];
+      }
+    });
+  }
+
+  document.addEventListener('input', saveToStorage);
+  document.addEventListener('change', saveToStorage);
+  window.addEventListener('load', loadFromStorage);
+
+  /* ---- SAVE AS IMAGE (renders print layout) ---- */
   async function saveAsImage() {
     const btn = document.getElementById('saveImgBtn');
-    btn.textContent = '⏳ Saving…';
+    btn.textContent = '⏳…';
     btn.disabled = true;
     try {
-      const canvas = await html2canvas(document.querySelector('.page'), {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false
+      // Temporarily apply print-like compact styles
+      const page = document.querySelector('.page');
+      const origStyle = page.getAttribute('style') || '';
+
+      // Force full-width render
+      page.style.maxWidth = '900px';
+      page.style.width = '900px';
+
+      // Force grids to multi-column (undo mobile stacking)
+      const styleTag = document.createElement('style');
+      styleTag.id = 'print-override';
+      styleTag.textContent = `
+        .fg-2 { grid-template-columns: 1fr 1fr !important; }
+        .fg-3 { grid-template-columns: 1fr 1fr 1fr !important; }
+        .fg-city { grid-template-columns: 2fr 1fr 1fr 1fr !important; }
+        .meta-row { grid-template-columns: 1fr 1fr !important; }
+        .sig-grid { grid-template-columns: 1fr 1fr !important; }
+        .sig-panel { border-right: 1px solid #c5c5c5 !important; border-bottom: none !important; }
+        .sig-panel:last-child { border-right: none !important; }
+        .fld { padding: 5px 10px !important; }
+        .fld label { font-size: 8px !important; }
+        .fld input, .fld select, .fld textarea { font-size: 11px !important; min-height: 18px !important; }
+        .sec-header { padding: 5px 12px !important; font-size: 11px !important; }
+      `;
+      document.head.appendChild(styleTag);
+
+      await new Promise(r => setTimeout(r, 200));
+
+      const canvas = await html2canvas(page, {
+        scale: 2, useCORS: true, backgroundColor: '#ffffff',
+        logging: false, scrollY: 0,
+        windowWidth: 920, windowHeight: page.scrollHeight
       });
-      const link = document.createElement('a');
-      const now = new Date();
-      const ts = String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + now.getFullYear();
-      link.download = 'toc-' + ts + '.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+
+      // Restore
+      page.setAttribute('style', origStyle);
+      document.getElementById('print-override').remove();
+
+      const win = window.open();
+      win.document.write('<img src="' + canvas.toDataURL('image/png') + '" style="max-width:100%">');
+      win.document.title = 'Transfer of Custody — Long-press to Save';
+
+      const toast = document.getElementById('saveToast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
     } catch(e) {
-      alert('Could not save image: ' + e.message);
+      alert('Could not save: ' + e.message);
     }
     btn.textContent = '💾 Save';
     btn.disabled = false;
