@@ -700,7 +700,8 @@
 
 <script>
   function genFormNum() {
-    return '#' + (Math.floor(Math.random() * 900000) + 100000);
+    const n = new Date();
+    return '#' + String(n.getMonth()+1).padStart(2,'0') + String(n.getDate()).padStart(2,'0') + n.getFullYear() + String(n.getHours()).padStart(2,'0') + String(n.getMinutes()).padStart(2,'0');
   }
 
   function stampDateTime() {
